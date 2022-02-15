@@ -62,7 +62,7 @@ class DataManager(object):
   @staticmethod
   def shiftIds(array):
     for i,item in enumerate(array):
-      item.id = i;
+      item.id = i
 
   def get(self, key):
     if  (key == "vertex"): return self.vertices

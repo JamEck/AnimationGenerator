@@ -123,14 +123,14 @@ class Bool2(object):
     self.wait = False
 
   def fall(self, inp):
-    self.act = inp and not self.wait;
-    self.wait = inp;
-    return self.act;
+    self.act = inp and not self.wait
+    self.wait = inp
+    return self.act
 
   def rise(self, inp):
-    self.act = not inp and self.wait;
-    self.wait = inp;
-    return self.act;
+    self.act = not inp and self.wait
+    self.wait = inp
+    return self.act
 
   def change(self, inp):
     if inp != act:

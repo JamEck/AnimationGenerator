@@ -40,9 +40,9 @@ class UIButton(Button):
 
   def update(self, mouse):
     super().update(mouse.checkHeld() and self.checkInside(mouse.clickPos))
-    if self.checkFall (): self.onFall(self.dataFall);
-    if self.checkRise (): self.onRise(self.dataRise);
-    if self.checkHeld(): self.onHeld(self.dataHeld);
+    if self.checkFall (): self.onFall(self.dataFall)
+    if self.checkRise (): self.onRise(self.dataRise)
+    if self.checkHeld(): self.onHeld(self.dataHeld)
 
   def draw(self, screen, pos = None):
     if (pos != None): self.pos = pos.copy()

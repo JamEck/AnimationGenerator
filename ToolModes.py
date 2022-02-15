@@ -85,7 +85,7 @@ class SelectMode(Mode):
   def onHover(self):
     self.findNearest("vlcp")
     if self.selectedData:
-      self.selectedData.printAttr(self.screen);
+      self.selectedData.printAttr(self.screen)
 
   def onLeftFall(self):
     self.selectedData = self.tempData
@@ -184,8 +184,9 @@ class LineMode(Mode):
   def onLeftRise(self):
     if self.selectedData:
       action = list()
-      if not self.linked: action.append(CreateVertex(self.selectedData, self.dm))
-      endPoint = self.dm.findNearestVertex(self.em.mouse.pos,10)
+      if not self.linked:
+        action.append(CreateVertex(self.selectedData, self.dm))
+      endPoint = self.tempData
       if not endPoint:
         endPoint = Vertex(self.em.mouse.pos)
         action.append(CreateVertex(endPoint,self.dm))

@@ -78,7 +78,9 @@ while em.running:
   fm.draw(screen)
 
   # Mode Actions #
-  if not em.keyboard[pg.K_LSHIFT].checkHeld():
+  if em.keyboard[pg.K_LSHIFT].checkHeld():
+    mo.tempData = None
+  else:
     mo.onHover()
   if em.mouse.left.checkFall():
     mo.onLeftFall()

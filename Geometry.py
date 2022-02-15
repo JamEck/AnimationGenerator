@@ -9,7 +9,7 @@ class Geometry(object):
     super(Geometry, self).__init__()
     self.color = (200,200,200)
     self.visible = True
-    self.id = None;
+    self.id = None
     self.fontSize = 20
     self.font = pg.font.SysFont("monospace", self.fontSize)
 
@@ -137,8 +137,8 @@ class Pill(Geometry):
     return (self.circle1,self.circle2) if (self.circle1.rad < self.circle2.rad) else (self.circle2,self.circle1)
 
   def update(self):
-    self.angles = self.getAngles();
-    self.points = self.getPoints();
+    self.angles = self.getAngles()
+    self.points = self.getPoints()
 
     if self.circle1.rad < 2: self.circle1.rad = 2
     if self.circle2.rad < 2: self.circle2.rad = 2

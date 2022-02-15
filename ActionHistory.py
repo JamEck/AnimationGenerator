@@ -15,7 +15,7 @@ class ActionHistory(object):
     if (self.stackptr < len(self.actions)-1):
       self.actions = self.actions[:self.stackptr+1]
     for each in action:
-      each.do();
+      each.do()
     self.actions.append(action)
     self.stackptr += 1
 
@@ -46,7 +46,12 @@ class Action(object):
     super(Action, self).__init__()
     self.data = obj
     self.dataMan = dataMan
-    self.ind = -1;
+    self.ind = -1
+
+class Creation(Action):
+  """docstring for Creation"""
+  def __init__(self, obj, dataMan):
+    super(Creation, self).__init__(obj, dataMan)
 
   def do(self):
     self.dataMan.add(self.data)
@@ -54,11 +59,10 @@ class Action(object):
   def undo(self):
     self.dataMan.remove(self.data)
 
-class CreateVertex(Action):
+class CreateVertex(Creation):
   """docstring for CreateVertex"""
   def __init__(self, vertObj, dataMan):
     super(CreateVertex, self).__init__(vertObj, dataMan)
-
 
 class DeleteVertex(Action):
   """docstring for DeleteVertex"""
@@ -82,19 +86,19 @@ class DeleteVertex(Action):
     for each in self.deleteList:
       self.dataMan.add(each)
 
-class CreateLine(Action):
+class CreateLine(Creation):
   """docstring for CreateLine"""
   def __init__(self, lineObj, dataMan):
     super(CreateLine, self).__init__(lineObj, dataMan)
 
 
-class CreateCircle(Action):
+class CreateCircle(Creation):
   """docstring for CreateCircle"""
   def __init__(self, circObj, dataMan):
     super(CreateCircle, self).__init__(circObj, dataMan)
 
 
-class CreatePill(Action):
+class CreatePill(Creation):
   """docstring for CreatePill"""
   def __init__(self, pillObj, dataMan):
     super(CreatePill, self).__init__(pillObj, dataMan)

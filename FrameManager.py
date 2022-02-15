@@ -1,0 +1,53 @@
+from DataManager import DataManager
+from ActionHistory import *
+import pygame as pg
+
+class Frame(object):
+  """docstring for Frame"""
+  def __init__(self):
+    super(Frame, self).__init__()
+    self.dm = DataManager()
+    self.ah = ActionHistory()
+
+class FrameManager(object):
+  """docstring for FrameManager"""
+  def __init__(self):
+    super(FrameManager, self).__init__()
+    self.fidx   = 0 # frame index
+    self.frames = [Frame()]
+    self.currFrame = self.frames[self.fidx]
+    self.font = pg.font.SysFont("monospace", 20)
+
+  def next(self):
+    if self.fidx < len(self.frames) - 1:
+      self.fidx += 1
+      self.currFrame = self.frames[self.fidx]
+    else:
+      self.frames.append(Frame())
+      self.fidx = len(self.frames)-1
+      self.currFrame = self.frames[self.fidx]
+
+  def prev(self):
+    if self.fidx > 0:
+      self.fidx -= 1
+      self.currFrame = self.frames[self.fidx]
+
+  def delete(self):
+    del self.frames[self.fidx]
+    if self.fidx > 0:
+      self.fidx -= 1
+      self.currFrame = self.frames[self.fidx]
+    else:
+      if len(self.frames) == 0:
+        self.frames.append(Frame())
+      self.currFrame = self.frames[0]
+
+  def draw(self, screen):
+    if self.fidx > 0:
+      self.frames[self.fidx - 1].dm.draw(screen, (50,30,30))
+    if self.fidx < len(self.frames) - 1:
+      self.frames[self.fidx + 1].dm.draw(screen, (30,50,30))
+    text = self.font.render("Frame: {} Total: {}".format(str(self.fidx), len(self.frames)), 0, (255,255,255))
+    screen.blit(text, (20, 40))
+    self.currFrame.dm.draw(screen)
+    self.currFrame.dm.drawInfo(screen)

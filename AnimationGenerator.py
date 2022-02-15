@@ -4,9 +4,10 @@ from ActionHistory import *
 from Mouse import Mouse
 from EventManager import EventManager
 from UIButton import UIButton
-from Geometry import *
-from DataManager import DataManager
-from ToolModes import *
+from Geometry     import *
+from DataManager  import DataManager
+from ToolModes    import *
+from FrameManager import *
 import time
 
 pg.init()
@@ -14,13 +15,11 @@ pg.init()
 screen = pg.display.set_mode((1280,960))
 pg.display.set_caption("Animation Tool")
 
-
 em = EventManager()
-dm = DataManager()
-ah = ActionHistory()
-mi = ModeIndicator(dm)
-mo = SelectMode(em,dm,ah,screen)
 
+fm = FrameManager()
+mi = ModeIndicator(fm.currFrame.dm)
+mo = SelectMode(fm.currFrame,em,screen)
 
 font = pg.font.SysFont("monospace", 20)
 
@@ -30,29 +29,55 @@ while em.running:
   screen.fill((20,0,50))
   em.update()
 
+  # Frame Control #
+  if em.keyboard[pg.K_RIGHT].checkFall():
+    fm.next()
+    mi.dm = fm.currFrame.dm
+    mo.dm = fm.currFrame.dm
+    mo.ah = fm.currFrame.ah
+  if em.keyboard[pg.K_LEFT].checkFall():
+    fm.prev()
+    mi.dm = fm.currFrame.dm
+    mo.dm = fm.currFrame.dm
+    mo.ah = fm.currFrame.ah
+  if em.keyboard[pg.K_d].checkFall():
+    if em.keyboard[pg.K_LCTRL].checkHeld():
+      fm.delete()
+      mi.dm = fm.currFrame.dm
+      mo.dm = fm.currFrame.dm
+      mo.ah = fm.currFrame.ah
+
+  #################
+
   # Choose Tool Mode #
   if   em.keyboard[pg.K_s].checkFall():
     mi.select("select")
     mo.reset()
-    mo = SelectMode(em,dm,ah,screen)
+    mo = SelectMode(fm.currFrame,em,screen)
   elif em.keyboard[pg.K_v].checkFall():
     mi.select("vertex")
     mo.reset()
-    mo = VertexMode(em,dm,ah,screen)
+    mo = VertexMode(fm.currFrame,em,screen)
   elif em.keyboard[pg.K_l].checkFall():
     mi.select("line")
     mo.reset()
-    mo = LineMode(em,dm,ah,screen)
+    mo = LineMode(fm.currFrame,em,screen)
   elif em.keyboard[pg.K_c].checkFall():
     mi.select("circle")
     mo.reset()
-    mo = CircleMode(em,dm,ah,screen)
+    mo = CircleMode(fm.currFrame,em,screen)
   elif em.keyboard[pg.K_p].checkFall():
     mi.select("pill")
     mo.reset()
-    mo = PillMode(em,dm,ah,screen)
+    mo = PillMode(fm.currFrame,em,screen)
+
+  if em.keyboard[pg.K_ESCAPE].checkFall():
+    mo.reset()
   ####################
 
+  fm.draw(screen)
+
+  # Mode Actions #
   if not em.keyboard[pg.K_LSHIFT].checkHeld():
     mo.onHover()
   if em.mouse.left.checkFall():
@@ -73,22 +98,18 @@ while em.running:
     mo.onRightHeld()
   if em.mouse.right.checkRise():
     mo.onRightRise()
-
+  ################
 
   # Undo/Redo #
-  if em.keyboard[pg.K_LCTRL].checkHeld():
-    if em.keyboard[pg.K_z].checkFall():
+  if em.keyboard[pg.K_z].checkFall():
+    if em.keyboard[pg.K_LCTRL].checkHeld():
       if em.keyboard[pg.K_LSHIFT].checkHeld():
-        ah.redo()
+        fm.currFrame.ah.redo()
       else:
-        ah.undo()
+        fm.currFrame.ah.undo()
   #############
 
   mi.draw(screen)
-  dm.draw(screen)
-
-  text = font.render("Vertices: " + str(len(dm.vertices)), 0, (255,255,255))
-  screen.blit(text, (1000, 100))
 
   pg.display.update()
 

@@ -8,6 +8,7 @@ class DataManager(object):
     self.lines    = list()
     self.circles = list()
     self.pills  = list()
+    self.font = pg.font.SysFont("monospace", 20)
 
   def add(self, item):
     if  (isinstance(item, Vertex)): self.vertices.append(item)
@@ -139,12 +140,23 @@ class DataManager(object):
 
     return results
 
-  def draw(self, screen):
+  def draw(self, screen, color = None):
+    if color == None: color = (255,255,255)
     for p in self.pills:
-      p.draw(screen)    
+      p.draw(screen, color)
     for c in self.circles:
-      c.draw(screen)
+      c.draw(screen, color)
     for l in self.lines:
-      l.draw(screen)
+      l.draw(screen, color)
     for v in self.vertices:
-      v.draw(screen)
+      v.draw(screen, color)
+
+  def drawInfo(self, screen):
+    text = self.font.render("Vertices| " + str(len(self.vertices)), 0, (255,255,255))
+    screen.blit(text, (20, 80))
+    text = self.font.render("Lines   | " + str(len(self.lines   )), 0, (255,255,255))
+    screen.blit(text, (20, 100))
+    text = self.font.render("Circles | " + str(len(self.circles )), 0, (255,255,255))
+    screen.blit(text, (20, 120))
+    text = self.font.render("Pills   | " + str(len(self.pills   )), 0, (255,255,255))
+    screen.blit(text, (20, 140))

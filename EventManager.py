@@ -21,5 +21,6 @@ class EventManager(object):
     for event in pg.event.get():
       if event.type == pg.QUIT:
         self.running = False
-    if self.keyboard[pg.K_ESCAPE].checkFall():
-      self.running = False
+    if self.keyboard[pg.K_w].checkFall():
+      if self.keyboard[pg.K_LCTRL].checkHeld():
+        self.running = False

@@ -36,19 +36,15 @@ class ModeIndicator(object):
       text = self.font.render(key, 0, (0,0,0))
       pg.draw.rect(screen, color, (pos,(85,20)))
       screen.blit(text, (pos[0]+5, pos[1]))
-      tocount = self.dm.get(key)
-      if tocount:
-        text = self.font.render(str(len(tocount)), 0, (255,255,255))
-        screen.blit(text, (pos[0]+5, pos[1] + 25))
 
 
 class Mode(object):
   """docstring for Mode"""
-  def __init__(self, em, dm, ah, screen):
+  def __init__(self, frame, em, screen):
     super(Mode, self).__init__()
     self.em = em
-    self.dm = dm
-    self.ah = ah
+    self.dm = frame.dm
+    self.ah = frame.ah
     self.screen = screen
     self.tempData = None
     self.selectedData = None
@@ -75,8 +71,8 @@ class Mode(object):
 
 class SelectMode(Mode):
   """docstring for SelectMode"""
-  def __init__(self, em, dm, ah, screen):
-    super(SelectMode, self).__init__(em, dm, ah, screen)
+  def __init__(self, frame, em, screen):
+    super(SelectMode, self).__init__(frame, em, screen)
 
   def onHover(self):
     self.findNearest("vlcp")
@@ -117,8 +113,8 @@ class SelectMode(Mode):
 
 class VertexMode(Mode):
   """docstring for VertexMode"""
-  def __init__(self, em, dm, ah, screen):
-    super(VertexMode, self).__init__(em, dm, ah, screen)
+  def __init__(self, frame, em, screen):
+    super(VertexMode, self).__init__(frame, em, screen)
 
   def onHover(self):
     self.findNearest('v')
@@ -151,8 +147,8 @@ class VertexMode(Mode):
 
 class LineMode(Mode):
   """docstring for LineMode"""
-  def __init__(self, em, dm, ah, screen):
-    super(LineMode, self).__init__(em, dm, ah, screen)
+  def __init__(self, frame, em, screen):
+    super(LineMode, self).__init__(frame, em, screen)
     self.linked = False
 
   def reset(self):
@@ -203,8 +199,8 @@ class LineMode(Mode):
 
 class CircleMode(Mode):
   """docstring for CircleMode"""
-  def __init__(self, em, dm, ah, screen):
-    super(CircleMode, self).__init__(em, dm, ah, screen)
+  def __init__(self, frame, em, screen):
+    super(CircleMode, self).__init__(frame, em, screen)
     self.linked = False
 
   def reset(self):
@@ -253,8 +249,8 @@ class CircleMode(Mode):
 
 class PillMode(Mode):
   """docstring for PillMode"""
-  def __init__(self, em, dm, ah, screen):
-    super(PillMode, self).__init__(em, dm, ah, screen)
+  def __init__(self, frame, em, screen):
+    super(PillMode, self).__init__(frame, em, screen)
     self.first = True
     self.geom  = Pill()
     self.action = []
@@ -306,16 +302,15 @@ class PillMode(Mode):
         self.first = False
         self.selectedData = None
       else:
+        self.geom.circle1.visible = False
+        self.geom.circle2.visible = False
         self.geom.update()
-        if not self.geom.failure:
-          self.geom.circle1.visible = False
-          self.geom.circle2.visible = False
-          self.action = self.action + [
-            CreateCircle(self.geom.circle1,self.dm),
-            CreateCircle(self.geom.circle2,self.dm),
-            CreatePill  (self.geom,self.dm)
-          ]
-          self.ah.do(self.action)
+        self.action = self.action + [
+          CreateCircle(self.geom.circle1,self.dm),
+          CreateCircle(self.geom.circle2,self.dm),
+          CreatePill  (self.geom,self.dm)
+        ]
+        self.ah.do(self.action)
         self.reset()
 
   def onMiddleFall(self):

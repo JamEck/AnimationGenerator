@@ -108,6 +108,9 @@ class Vec2(object):
   def asTuple(self):
     return (self.x, self.y)
 
+  def toInt(self):
+    return Vec2(int(self.x),int(self.y))
+
   def copy(self):
     return Vec2(self.x,self.y)
 

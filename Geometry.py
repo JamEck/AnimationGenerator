@@ -36,6 +36,12 @@ class Vertex(Geometry):
     self.giveAttr(v)
     return v
 
+  def set(self,v):
+    if isinstance(v, Vec2):
+      self.pos = v.toInt()
+    if isinstance(v, Vertex):
+      self.pos = v.pos.toInt()
+
   def draw(self, screen, color = None):
     if self.visible:
       if color == None:
@@ -52,6 +58,7 @@ class Line(Geometry):
     super(Line, self).__init__()
     self.p1 = p1
     self.p2 = p2
+    self.maxlen = 0
 
   def copy(self):
     l = Line(self.p1.copy(), self.p2.copy())
@@ -74,6 +81,13 @@ class Line(Geometry):
     self.p1.printAttr(screen)
     self.p2.printAttr(screen)
 
+  def restrictLength(self, p):
+    if self.maxlen > 0:
+      other = self.p2 if self.p1 == p else self.p1
+      disp = p.pos - other.pos
+      if disp.mag() > self.maxlen:
+        p.set(other.pos + disp.norm() * self.maxlen)
+
 
 class Circle(Geometry):
   """docstring for Circle"""
@@ -81,6 +95,7 @@ class Circle(Geometry):
     super(Circle, self).__init__()
     self.center = pos
     self.rad = rad
+    self.maxRad = 0
 
   def copy(self):
     c = Circle(self.center.copy(), self.rad)
@@ -101,6 +116,10 @@ class Circle(Geometry):
     self.printText(screen, "Circ: " + str(self.id), nearest.asTuple())
     self.printText(screen, "Rad: " + str(self.rad), (nearest + Vec2(0, self.fontSize)).asTuple())
     self.center.printAttr(screen)
+
+  def restrictRadius(self):
+    if self.maxRad > 0 and self.rad > self.maxRad:
+      self.rad = self.maxRad
 
 
 class Pill(Geometry):

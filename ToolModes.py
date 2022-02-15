@@ -190,7 +190,7 @@ class LineMode(Mode):
       if not endPoint:
         endPoint = Vertex(self.em.mouse.pos)
         action.append(CreateVertex(endPoint,self.dm))
-      action.append(CreateLine(Line(endPoint, self.selectedData),self.dm))
+      action.append(CreateLine(Line( self.selectedData, endPoint),self.dm))
       self.ah.do(action)
       self.reset()
 

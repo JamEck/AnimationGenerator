@@ -113,6 +113,7 @@ class MoveVertex(Action):
 
   def do(self):
     self.data.pos = self.newPos.copy()
+    for each in self.dataMan.getLineWith(self.data): each.restrictLength(self.data)
     for each in self.dataMan.getPillWith(self.data): each.update()
 
   def undo(self):
@@ -128,6 +129,7 @@ class ResizeCircle(Action):
 
   def do(self):
     self.data.rad = self.newRad
+    self.data.restrictRadius()
     for each in self.dataMan.getPillWith(self.data): each.update()
 
   def undo(self):

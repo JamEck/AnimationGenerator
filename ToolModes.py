@@ -130,25 +130,30 @@ class LineMode(object):
     nearestV = self.dm.findNearestVertex(self.em.mouse.pos,10)
     if nearestV:
       pg.draw.rect(self.screen, (100,100,100), ((nearestV.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
-    nearestL = self.dm.findNearestLine(self.em.mouse.pos,10)
-    if nearestL:
-      pg.draw.rect(self.screen, (100,100,100), ((nearestL.midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
+    else:
+      nearestL = self.dm.findNearestLine(self.em.mouse.pos,10)
+      if nearestL:
+        pg.draw.rect(self.screen, (100,100,100), ((nearestL.midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
 
   def onLeftFall(self):
     self.tempData = self.dm.findNearestVertex(self.em.mouse.pos,10)
+    if not self.tempData:
+      self.tempData = Vertex(self.em.mouse.pos)
 
   def onLeftHeld(self):
     if self.tempData:
       pg.draw.line(self.screen, (100,100,100), self.em.mouse.pos.asTuple(), self.tempData.pos.asTuple())
       pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+      self.tempData.draw(self.screen)
 
   def onLeftRise(self):
     if self.tempData:
-      vert = Vertex(self.em.mouse.pos)
-      action = [
-        CreateLine(Line(vert, self.tempData),self.dm),
-        CreateVertex(vert,self.dm)
-      ]
+      endPoint = self.dm.findNearestVertex(self.em.mouse.pos,10)
+      action = [CreateVertex(self.tempData, self.dm)]
+      if not endPoint:
+        endPoint = Vertex(self.em.mouse.pos)
+        action.append(CreateVertex(endPoint,self.dm))
+      action.append(CreateLine(Line(endPoint, self.tempData),self.dm))
       self.ah.do(action)
 
   def onMiddleFall(self):
@@ -173,6 +178,7 @@ class CircleMode(object):
     self.dm = dm
     self.ah = ah
     self.screen = screen
+    self.tempData = None
 
   def onHover(self):
     nearest = self.dm.findNearestVertex(self.em.mouse.pos,10)
@@ -180,11 +186,24 @@ class CircleMode(object):
       pg.draw.rect(self.screen, (100,100,100), ((nearest.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
 
   def onLeftFall(self):
-    pass
+    self.tempData = self.dm.findNearestVertex(self.em.mouse.pos,10)
+    if not self.tempData:
+      self.tempData = Vertex(self.em.mouse.pos)
   def onLeftHeld(self):
-    pass
+    if self.tempData:
+      rad = (self.tempData.pos - self.em.mouse.pos).mag()
+      rad = 1 if rad < 1 else int(rad)
+      self.tempData.draw(self.screen)
+      pg.draw.circle(self.screen, (100,100,100), self.tempData.pos.asTuple(), rad, 1)
   def onLeftRise(self):
-    pass
+    if self.tempData:
+      rad = (self.tempData.pos - self.em.mouse.pos).mag()
+      rad = 1 if rad < 1 else int(rad)
+      action = [
+        CreateVertex(self.tempData,self.dm),
+        CreateCircle(Circle(self.tempData, rad),self.dm)
+      ]
+      self.ah.do(action)
   def onMiddleFall(self):
     pass
   def onMiddleHeld(self):

@@ -4,10 +4,20 @@ import pygame as pg
 
 class Frame(object):
   """docstring for Frame"""
-  def __init__(self):
+  def __init__(self, frame = None):
     super(Frame, self).__init__()
-    self.dm = DataManager()
+    if frame == None:
+      self.dm = DataManager()
+    else:
+      self.dm = frame.dm.copy()
     self.ah = ActionHistory()
+
+
+  def copy(self):
+    f = Frame()
+    f.dm = self.dm.copy()
+    f.ah = ActionHistory()
+    return f
 
 class FrameManager(object):
   """docstring for FrameManager"""
@@ -23,7 +33,7 @@ class FrameManager(object):
       self.fidx += 1
       self.currFrame = self.frames[self.fidx]
     else:
-      self.frames.append(Frame())
+      self.frames.append(Frame(self.currFrame))
       self.fidx = len(self.frames)-1
       self.currFrame = self.frames[self.fidx]
 

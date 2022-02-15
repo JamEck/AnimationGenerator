@@ -18,8 +18,8 @@ pg.display.set_caption("Animation Tool")
 em = EventManager()
 
 fm = FrameManager()
-mi = ModeIndicator(fm.currFrame.dm)
-mo = SelectMode(fm.currFrame,em,screen)
+mi = ModeIndicator(fm.currFrame.dm)     # Mode Indicator GUI
+mo = SelectMode(fm.currFrame,em,screen) # Current Tool Mode
 
 font = pg.font.SysFont("monospace", 20)
 

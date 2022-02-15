@@ -7,6 +7,9 @@ class ActionHistory(object):
     self.actions = list()
     self.stackptr = -1
 
+  def copy(self):
+    return ActionHistory()
+
   def do(self,action):
     if not isinstance(action, (list,tuple)): action = [action]
     if (self.stackptr < len(self.actions)-1):
@@ -37,12 +40,13 @@ class ActionHistory(object):
       ans += "{} ".format(each)
     return ans
 
-class CreateVertex(object):
-  """docstring for CreateVertex"""
-  def __init__(self, vertObj, dataMan):
-    super(CreateVertex, self).__init__()
-    self.data = vertObj
+class Action(object):
+  """docstring for Action"""
+  def __init__(self, obj, dataMan):
+    super(Action, self).__init__()
+    self.data = obj
     self.dataMan = dataMan
+    self.ind = -1;
 
   def do(self):
     self.dataMan.add(self.data)
@@ -50,12 +54,17 @@ class CreateVertex(object):
   def undo(self):
     self.dataMan.remove(self.data)
 
-class DeleteVertex(object):
+class CreateVertex(Action):
+  """docstring for CreateVertex"""
+  def __init__(self, vertObj, dataMan):
+    super(CreateVertex, self).__init__(vertObj, dataMan)
+
+
+class DeleteVertex(Action):
   """docstring for DeleteVertex"""
   def __init__(self, vertObj, dataMan):
-    super(DeleteVertex, self).__init__()
+    super(DeleteVertex, self).__init__(vertObj, dataMan)
     self.vert = vertObj
-    self.dataMan = dataMan
     self.deleteList = (
       self.dataMan.getLineWith(vertObj)   +
       self.dataMan.getCircleWith(vertObj) +
@@ -73,51 +82,28 @@ class DeleteVertex(object):
     for each in self.deleteList:
       self.dataMan.add(each)
 
-class CreateLine(object):
+class CreateLine(Action):
   """docstring for CreateLine"""
   def __init__(self, lineObj, dataMan):
-    super(CreateLine, self).__init__()
-    self.data = lineObj
-    self.dataMan = dataMan
+    super(CreateLine, self).__init__(lineObj, dataMan)
 
-  def do(self):
-    self.dataMan.add(self.data)
 
-  def undo(self):
-    self.dataMan.remove(self.data)
-
-class CreateCircle(object):
+class CreateCircle(Action):
   """docstring for CreateCircle"""
   def __init__(self, circObj, dataMan):
-    super(CreateCircle, self).__init__()
-    self.data = circObj
-    self.dataMan = dataMan
+    super(CreateCircle, self).__init__(circObj, dataMan)
 
-  def do(self):
-    self.dataMan.add(self.data)
 
-  def undo(self):
-    self.dataMan.remove(self.data)
-
-class CreatePill(object):
+class CreatePill(Action):
   """docstring for CreatePill"""
   def __init__(self, pillObj, dataMan):
-    super(CreatePill, self).__init__()
-    self.data = pillObj
-    self.dataMan = dataMan
+    super(CreatePill, self).__init__(pillObj, dataMan)
 
-  def do(self):
-    self.dataMan.add(self.data)
 
-  def undo(self):
-    self.dataMan.remove(self.data)
-
-class MoveVertex(object):
+class MoveVertex(Action):
   """docstring for MoveVertex"""
   def __init__(self, vertObj, newPos, dataMan):
-    super(MoveVertex, self).__init__()
-    self.data = vertObj
-    self.dataMan = dataMan
+    super(MoveVertex, self).__init__(vertObj, dataMan)
     self.oldPos = self.data.pos
     self.newPos = newPos
 
@@ -129,12 +115,10 @@ class MoveVertex(object):
     self.data.pos = self.oldPos
     for each in self.dataMan.getPillWith(self.data): each.update()
 
-class ResizeCircle(object):
+class ResizeCircle(Action):
   """docstring for ResizeCircle"""
   def __init__(self, circObj, newRad, dataMan):
-    super(ResizeCircle, self).__init__()
-    self.data = circObj
-    self.dataMan = dataMan
+    super(ResizeCircle, self).__init__(circObj, dataMan)
     self.oldRad = circObj.rad
     self.newRad = int(newRad)
 

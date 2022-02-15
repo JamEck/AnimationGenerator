@@ -23,15 +23,57 @@ class Vec2(object):
     self.x = inp[0]
     self.y = inp[1]
 
+
+  def add(self, other):
+    if isinstance(other, Vec2):
+      return Vec2(self.x + other.x, self.y + other.y)
+    elif isinstance(other, (int, float)):
+      return Vec2(self.x + other, self.y + other)
   def __add__(self, other):
-    return Vec2(self.x + other.x, self.y + other.y)
+    return self.add(other)
+  def __radd__(self, other):
+    return self.add(other)
+  def __iadd__(self, other):
+    self.x += other.x
+    self.y += other.y
+
+
+  def sub(self, other, minuend=True):
+    if isinstance(other, Vec2):
+      if minuend:
+        return Vec2(self.x - other.x, self.y - other.y)
+      else:
+        return Vec2(other.x - self.x, other.y - self.y)
+    elif isinstance(other, (int, float)):
+      if minuend:
+        return Vec2(self.x - other, self.y - other)
+      else:
+        return Vec2(other - self.x, other - self.y)
   def __sub__(self, other):
-    return Vec2(self.x - other.x, self.y - other.y)
-  def __mul__(self, other):
-    if   isinstance(other, (int,float)):
+    return self.sub(other, True)
+  def __rsub__(self, other):
+    return self.sub(other, False)
+  def __isub__(self, other):
+    self.x -= other.x
+    self.y -= other.y
+
+
+  def dot(self, other):
+    return self.x * other.x + self.y * other.y
+  def mul(self, other):
+    if isinstance(other, Vec2):
+      return self.dot(other)
+    elif isinstance(other, (int, float)):
       return Vec2(self.x * other, self.y * other)
-    elif isinstance(other, Vec2):
-      return self.x * other.x + self.y * other.y
+  def __mul__(self, other):
+    return self.mul(other)
+  def __rmul__(self, other):
+    return self.mul(other)
+  def __imul__(self, other):
+    self.x *= other.x
+    self.y *= other.y
+
+
   def __div__(self, other):
     if isinstance(other, (int,float)):
       return Vec2(self.x / other, self.y / other)

@@ -11,10 +11,10 @@ class DataManager(object):
     self.font = pg.font.SysFont("monospace", 20)
 
   def add(self, item):
-    if  (isinstance(item, Vertex)): self.vertices.append(item)
-    elif(isinstance(item, Line  )): self.   lines.append(item)
-    elif(isinstance(item, Circle)): self. circles.append(item)
-    elif(isinstance(item, Pill  )): self.   pills.append(item)
+    if  (isinstance(item, Vertex)): self.assign(item, self.vertices)
+    elif(isinstance(item, Line  )): self.assign(item, self.   lines)
+    elif(isinstance(item, Circle)): self.assign(item, self. circles)
+    elif(isinstance(item, Pill  )): self.assign(item, self.   pills)
     else: print("Improper input type!")
 
   def remove(self, item):
@@ -23,6 +23,46 @@ class DataManager(object):
     elif(isinstance(item, Circle)): self. circles.remove(item)
     elif(isinstance(item, Pill  )): self.   pills.remove(item)
     else: print("Improper input type!")
+
+  def copy(self):
+    dm = DataManager()
+    for each in self.vertices: dm.vertices.append(each.copy())
+    for each in self.lines   : dm.lines   .append(each.copy())
+    for each in self.circles : dm.circles .append(each.copy())
+    for each in self.pills   : dm.pills   .append(each.copy())
+    self._link(dm)
+    return dm
+
+  def findByID(self, array, id):
+    for each in array:
+      if id == each.id:
+        return each
+    return None
+
+  def _link(self, other):
+    for i in range(len(self.lines)):
+      other.lines[i].p1 = self.findByID(other.vertices,self.lines[i].p1.id)
+      other.lines[i].p2 = self.findByID(other.vertices,self.lines[i].p2.id)
+    for i in range(len(self.circles)):
+      other.circles[i].center = self.findByID(other.vertices,self.circles[i].center.id)
+    for i in range(len(self.pills)):
+      other.pills[i].circle1 = self.findByID(other.circles,self.pills[i].circle1.id)
+      other.pills[i].circle2 = self.findByID(other.circles,self.pills[i].circle2.id)
+
+  @staticmethod
+  def assign(item, array):
+    newid = len(array)
+    for each in range(len(array)):
+      if each != array[each].id:
+        newid = each
+        break
+    item.id = newid
+    array.insert(newid, item)
+
+  @staticmethod
+  def shiftIds(array):
+    for i,item in enumerate(array):
+      item.id = i;
 
   def get(self, key):
     if  (key == "vertex"): return self.vertices
@@ -90,6 +130,27 @@ class DataManager(object):
       if dist < minDist:
         minDist = dist
         ans = circ
+    return ans if (minDist <= maxDist or maxDist == -1) else None
+
+  def findNearestPill(self, pos, maxDist = -1):
+    if len(self.pills) < 1: return None
+    ans = self.pills[0]
+    edge = Line(Vertex(self.pills[0].points[0]), Vertex(self.pills[0].points[1]))
+    minDist = self.distFromLine(pos, edge)
+    if minDist < 0: minDist = -minDist
+    for pill in self.pills:
+      edge = Line(Vertex(pill.points[0]), Vertex(pill.points[1]))
+      dist = self.distFromLine(pos, edge)
+      if dist < 0: dist = -dist
+      if dist < minDist:
+        minDist = dist
+        ans = pill
+      edge = Line(Vertex(pill.points[2]), Vertex(pill.points[3]))
+      dist = self.distFromLine(pos, edge)
+      if dist < 0: dist = -dist
+      if dist < minDist:
+        minDist = dist
+        ans = pill
     return ans if (minDist <= maxDist or maxDist == -1) else None
 
   def getVertex(self, index):

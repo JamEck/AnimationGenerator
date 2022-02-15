@@ -1,3 +1,11 @@
-from Utils import *
+a = (1,2,3)
 
-Vec2.normAtAngle()
+b = a.copy()
+
+print(a)
+print(b)
+
+b[1] = 7
+
+print(a)
+print(b)

@@ -48,6 +48,7 @@ class Mode(object):
     self.screen = screen
     self.tempData = None
     self.selectedData = None
+    self.font = pg.font.SysFont("monospace", 20)
 
   def reset(self):
     self.tempData = None
@@ -58,16 +59,23 @@ class Mode(object):
       self.tempData = self.dm.findNearestVertex(self.em.mouse.pos,10)
       if self.tempData:
         pg.draw.rect(self.screen, (100,100,100), ((self.tempData.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
-        return
+        return self.tempData
     if 'l' in items:
       self.tempData = self.dm.findNearestLine(self.em.mouse.pos,10)
       if self.tempData:
         pg.draw.rect(self.screen, (100,100,100), ((self.tempData.midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
-        return
+        return self.tempData
+    if 'p' in items:
+      self.tempData = self.dm.findNearestPill(self.em.mouse.pos,10)
+      if self.tempData:
+        pg.draw.rect(self.screen, (100,100,100), ((self.tempData.getAxis().midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
+        return self.tempData
     if 'c' in items:
       self.tempData = self.dm.findNearestCircle(self.em.mouse.pos,10)
       if self.tempData:
         pg.draw.rect(self.screen, (100,100,100), ((self.tempData.nearestPoint(self.em.mouse.pos) - Vec2(5,5)).asTuple(), (10,10)), 1)
+        return self.tempData
+    return None
 
 class SelectMode(Mode):
   """docstring for SelectMode"""
@@ -76,6 +84,8 @@ class SelectMode(Mode):
 
   def onHover(self):
     self.findNearest("vlcp")
+    if self.selectedData:
+      self.selectedData.printAttr(self.screen);
 
   def onLeftFall(self):
     self.selectedData = self.tempData
@@ -85,7 +95,7 @@ class SelectMode(Mode):
       if   isinstance(self.selectedData, Vertex):
         pg.draw.line(self.screen, (100,100,100), self.selectedData.pos.asTuple(), self.em.mouse.pos.asTuple())
         pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
-      elif isinstance(self.selectedData,        Circle):
+      elif isinstance(self.selectedData, Circle):
         pg.draw.line(self.screen, (100,100,100), self.selectedData.center.pos.asTuple(), self.em.mouse.pos.asTuple())
         pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
 
@@ -104,7 +114,7 @@ class SelectMode(Mode):
   def onMiddleRise(self):
     pass
   def onRightFall(self):
-    pass
+      self.selectedData = self.tempData
   def onRightHeld(self):
     pass
   def onRightRise(self):

@@ -1,0 +1,2 @@
+call python AnimationGenerator.py
+pause

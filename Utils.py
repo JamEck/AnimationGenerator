@@ -28,10 +28,30 @@ class Vec2(object):
   def __sub__(self, other):
     return Vec2(self.x - other.x, self.y - other.y)
   def __mul__(self, other):
-    return self.x * other.x + self.y * other.y
+    if   isinstance(other, (int,float)):
+      return Vec2(self.x * other, self.y * other)
+    elif isinstance(other, Vec2):
+      return self.x * other.x + self.y * other.y
+  def __div__(self, other):
+    if isinstance(other, (int,float)):
+      return Vec2(self.x / other, self.y / other)
+  def __truediv__(self, other):
+    if isinstance(other, (int,float)):
+      return Vec2(self.x / other, self.y / other)
+
+  def angle(self):
+    return math.atan2(self.y, self.x)
+
+  @staticmethod
+  def normAtAngle(angle):
+    return Vec2(math.cos(angle), math.sin(angle))
+
   def cross(self, other):
     return self.x * other.y - self.y * other.x
 
+  def sqDist(self,other):
+    dv = other-self
+    return dv*dv
   def dist(self,other):
     return (other-self).mag()
   def midpoint(self, other):
@@ -39,6 +59,9 @@ class Vec2(object):
 
   def mag(self):
     return math.sqrt(self*self)
+  def norm(self):
+    mag = self.mag()
+    return self/mag if mag else Vec2(0,0)
 
   def asTuple(self):
     return (self.x, self.y)
@@ -48,6 +71,7 @@ class Vec2(object):
 
   def __str__(self):
     return "({},{})".format(self.x,self.y)
+
 
 class Bool2(object):
   """4-state, 2D Boolean"""

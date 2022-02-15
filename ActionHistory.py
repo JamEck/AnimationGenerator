@@ -56,34 +56,22 @@ class DeleteVertex(object):
     super(DeleteVertex, self).__init__()
     self.vert = vertObj
     self.dataMan = dataMan
-    self.lineList = self.dataMan.getLineWith(vertObj)
-    self.data = (self.vert, self.lineList)
+    self.deleteList = (
+      self.dataMan.getLineWith(vertObj)   +
+      self.dataMan.getCircleWith(vertObj) +
+      self.dataMan.getPillWith(vertObj)
+    )
+    self.data = (self.vert, self.deleteList)
 
   def do(self):
     self.dataMan.remove(self.vert)
-    for line in self.lineList:
-      self.dataMan.remove(line)
+    for each in self.deleteList:
+      self.dataMan.remove(each)
 
   def undo(self):
     self.dataMan.add(self.vert)
-    for line in self.lineList:
-      self.dataMan.add(line)
-
-class MoveVertex(object):
-  """docstring for MoveVertex"""
-  def __init__(self, vertObj, newPos, dataMan):
-    super(MoveVertex, self).__init__()
-    self.data = vertObj
-    self.dataMan = dataMan
-    self.oldPos = self.data.pos
-    self.newPos = newPos
-
-  def do(self):
-    self.data.pos = self.newPos.copy()
-
-  def undo(self):
-    self.data.pos = self.oldPos
-
+    for each in self.deleteList:
+      self.dataMan.add(each)
 
 class CreateLine(object):
   """docstring for CreateLine"""
@@ -110,3 +98,50 @@ class CreateCircle(object):
 
   def undo(self):
     self.dataMan.remove(self.data)
+
+class CreatePill(object):
+  """docstring for CreatePill"""
+  def __init__(self, pillObj, dataMan):
+    super(CreatePill, self).__init__()
+    self.data = pillObj
+    self.dataMan = dataMan
+
+  def do(self):
+    self.dataMan.add(self.data)
+
+  def undo(self):
+    self.dataMan.remove(self.data)
+
+class MoveVertex(object):
+  """docstring for MoveVertex"""
+  def __init__(self, vertObj, newPos, dataMan):
+    super(MoveVertex, self).__init__()
+    self.data = vertObj
+    self.dataMan = dataMan
+    self.oldPos = self.data.pos
+    self.newPos = newPos
+
+  def do(self):
+    self.data.pos = self.newPos.copy()
+    for each in self.dataMan.getPillWith(self.data): each.update()
+
+  def undo(self):
+    self.data.pos = self.oldPos
+    for each in self.dataMan.getPillWith(self.data): each.update()
+
+class ResizeCircle(object):
+  """docstring for ResizeCircle"""
+  def __init__(self, circObj, newRad, dataMan):
+    super(ResizeCircle, self).__init__()
+    self.data = circObj
+    self.dataMan = dataMan
+    self.oldRad = circObj.rad
+    self.newRad = int(newRad)
+
+  def do(self):
+    self.data.rad = self.newRad
+    for each in self.dataMan.getPillWith(self.data): each.update()
+
+  def undo(self):
+    self.data.rad = self.oldRad
+    for each in self.dataMan.getPillWith(self.data): each.update()

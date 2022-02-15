@@ -9,8 +9,6 @@ from DataManager import DataManager
 from ToolModes import *
 import time
 
-
-
 pg.init()
 
 screen = pg.display.set_mode((1280,960))
@@ -20,8 +18,11 @@ pg.display.set_caption("Animation Tool")
 em = EventManager()
 dm = DataManager()
 ah = ActionHistory()
-mi = ModeIndicator()
+mi = ModeIndicator(dm)
 mo = SelectMode(em,dm,ah,screen)
+
+
+font = pg.font.SysFont("monospace", 20)
 
 nearest = None
 while em.running:
@@ -32,20 +33,28 @@ while em.running:
   # Choose Tool Mode #
   if   em.keyboard[pg.K_s].checkFall():
     mi.select("select")
+    mo.reset()
     mo = SelectMode(em,dm,ah,screen)
   elif em.keyboard[pg.K_v].checkFall():
     mi.select("vertex")
+    mo.reset()
     mo = VertexMode(em,dm,ah,screen)
   elif em.keyboard[pg.K_l].checkFall():
     mi.select("line")
+    mo.reset()
     mo = LineMode(em,dm,ah,screen)
   elif em.keyboard[pg.K_c].checkFall():
     mi.select("circle")
+    mo.reset()
     mo = CircleMode(em,dm,ah,screen)
+  elif em.keyboard[pg.K_p].checkFall():
+    mi.select("pill")
+    mo.reset()
+    mo = PillMode(em,dm,ah,screen)
   ####################
 
-  # if not em.keyboard[pg.K_LSHIFT].checkHeld():
-  mo.onHover()
+  if not em.keyboard[pg.K_LSHIFT].checkHeld():
+    mo.onHover()
   if em.mouse.left.checkFall():
     mo.onLeftFall()
   if em.mouse.left.checkHeld():
@@ -77,6 +86,10 @@ while em.running:
 
   mi.draw(screen)
   dm.draw(screen)
+
+  text = font.render("Vertices: " + str(len(dm.vertices)), 0, (255,255,255))
+  screen.blit(text, (1000, 100))
+
   pg.display.update()
 
 pg.quit()

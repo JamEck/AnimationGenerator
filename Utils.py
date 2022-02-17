@@ -1,11 +1,86 @@
 import math
+from cv2 import TermCriteria_COUNT
+import pygame as pg
+
+class COLOR:
+  BLACK   = (0x00, 0x00, 0x00)
+  BLUE    = (0x00, 0x00, 0xFF)
+  GREEN   = (0x00, 0xFF, 0x00)
+  CYAN    = (0x00, 0xFF, 0xFF)
+  RED     = (0xFF, 0x00, 0x00)
+  MAGENTA = (0xFF, 0x00, 0xFF)
+  YELLOW  = (0xFF, 0xFF, 0x00)
+  WHITE   = (0xFF, 0xFF, 0xFF)
+
+def sign(boolean):
+  return 1 if boolean else -1
+
+
+class TextBox(object):
+  BORDER_BUFFER = 3
+  DEFAULT_TEXT_COLOR = COLOR.WHITE
+  DEFAULT_BOX_COLOR  = COLOR.BLACK
+
+  def __init__(self, text = str(), dim = (100,50), pos = (0,0)):
+    self.font = None
+    self.dim  = Vec2(dim)
+    self.pos  = Vec2(pos)
+    self.text = text
+    self.drawBox  = True
+    self.color    = TextBox.DEFAULT_TEXT_COLOR
+    self.boxColor = TextBox.DEFAULT_BOX_COLOR
+    self.setText(text)
+
+  def fitFontSizeToDims(self):
+    letterCount = len(self.text)
+    if letterCount == 0: letterCount = 1
+    fontsize = int((self.dim.x - TextBox.BORDER_BUFFER) / letterCount * 8 / 5)
+    fontsize = min(fontsize, self.dim.y - TextBox.BORDER_BUFFER)
+    self.font = pg.font.SysFont("monospace", fontsize)
+    self.updateTextRender()
+
+  def toggleOutline(self, inp):
+    self.drawBox = inp
+
+  def setTextColor(self, color):
+    self.color = color
+    self.updateTextRender()
+
+  def setBoxColor(self, color):
+    self.boxColor = color
+
+  def resetTextColor(self):
+    self.setTextColor(TextBox.DEFAULT_TEXT_COLOR)
+
+  def resetBoxColor(self):
+    self.setBoxColor(TextBox.DEFAULT_BOX_COLOR)
+
+  def updateTextRender(self):
+    self.textrender = self.font.render(self.text, 0, self.color)
+
+  def setText(self, text):
+    self.text = text
+    self.fitFontSizeToDims()
+    self.updateTextRender()
+  
+  def setDim(self,w,h):
+    self.dim = Vec2(w,h)
+    self.fitFontSizeToDims()
+    self.updateTextRender()
+
+  def incDim(self,w,h):
+    self.dim.iadd(w,h)
+    self.fitFontSizeToDims()
+    self.updateTextRender()
+
+  def draw(self, screen):
+    pos = self.pos + (TextBox.BORDER_BUFFER,0)
+    pg.draw.rect(screen, self.boxColor, (self.pos.asTuple(), self.dim.asTuple()), sign(self.drawBox))
+    if self.text:
+      screen.blit(self.textrender, pos.asTuple())
+
 
 class Vec2(object):
-  # def __init__(self, x = 0, y = 0):
-  #   super(Vec2, self).__init__()
-  #   self.x = x
-  #   self.y = y
-
   def __init__(self, *inp):
     super(Vec2, self).__init__()
     if(not inp): self.set(0,0)
@@ -24,15 +99,31 @@ class Vec2(object):
     self.y = inp[1]
 
 
+  def add(self, x, y):
+    return Vec2(self.x + x, self.y + y)
+
   def add(self, other):
     if isinstance(other, Vec2):
       return Vec2(self.x + other.x, self.y + other.y)
+    elif isinstance(other, (list, tuple)):
+      s = len(other)
+      if s == 0:
+        return self.copy()
+      elif s < 2:
+        return self.add(len[0])
+      return Vec2(self.x + other[0], self.y + other[1])
     elif isinstance(other, (int, float)):
       return Vec2(self.x + other, self.y + other)
+
   def __add__(self, other):
     return self.add(other)
   def __radd__(self, other):
     return self.add(other)
+
+  def iadd(self, x, y):
+    self.x += x
+    self.y += y
+
   def __iadd__(self, other):
     self.x += other.x
     self.y += other.y
@@ -145,6 +236,7 @@ class Bool2(object):
   def check(self):
     return self.act
 
+
 class Button(object):
   """Button :)"""
   def __init__(self):
@@ -152,15 +244,24 @@ class Button(object):
     self.state = False
     self.fall  = Bool2()
     self.rise  = Bool2()
+    self.holdSpent = False
+    self.fallSpent = False
+    self.riseSpent = False
+
+  def anything(self):
+    return self.state or self.fall.check() or self.rise.check()
 
   def update(self, inp):
     self.state = inp
     self.fall.fall(inp)
     self.rise.rise(inp)
+    self.holdSpent = False
+    self.fallSpent = False
+    self.riseSpent = False
 
   def checkHeld(self):
-    return self.state
+    return self.state and not self.holdSpent
   def checkFall(self):
-    return self.fall.check()
+    return self.fall.check() and not self.fallSpent
   def checkRise(self):
-    return self.rise.check()
+    return self.rise.check() and not self.riseSpent

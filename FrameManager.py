@@ -52,6 +52,21 @@ class FrameManager(object):
         self.frames.append(Frame())
       self.currFrame = self.frames[0]
 
+  def getDM(self):
+    return self.currFrame.dm
+
+  def getAH(self):
+    return self.currFrame.ah
+
+  def update(self, em):
+    if em.keyboard[pg.K_RIGHT].checkFall():
+      self.next()
+    if em.keyboard[pg.K_LEFT].checkFall():
+      self.prev()
+    if em.keyboard[pg.K_d].checkFall():
+      if em.keyboard[pg.K_LCTRL].checkHeld():
+        self.delete()
+
   def draw(self, screen):
     if self.fidx > 0:
       self.frames[self.fidx - 1].dm.draw(screen, (50,30,30))

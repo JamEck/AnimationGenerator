@@ -109,7 +109,7 @@ class MoveVertex(Action):
   def __init__(self, vertObj, newPos, dataMan):
     super(MoveVertex, self).__init__(vertObj, dataMan)
     self.oldPos = self.data.pos
-    self.newPos = newPos
+    self.newPos = newPos.copy()
 
   def do(self):
     self.data.pos = self.newPos.copy()

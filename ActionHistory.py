@@ -91,6 +91,18 @@ class CreateLine(Creation):
   def __init__(self, lineObj, dataMan):
     super(CreateLine, self).__init__(lineObj, dataMan)
 
+class DeleteLine(Action):
+  """docstring for DeleteLine"""
+  def __init__(self, lineObj, dataMan):
+    super(DeleteLine, self).__init__(lineObj, dataMan)
+
+  def do(self):
+    self.dataMan.remove(self.data)
+
+  def undo(self):
+    self.dataMan.add(self.data)
+
+
 
 class CreateCircle(Creation):
   """docstring for CreateCircle"""

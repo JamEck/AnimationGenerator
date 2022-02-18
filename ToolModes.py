@@ -180,7 +180,9 @@ class LineMode(Mode):
   def onRightHeld(self):
     pass
   def onRightRise(self):
-    pass
+    nearest = self.fm.getDM().findNearestLine(self.em.mouse.pos,10)
+    if nearest: self.fm.getAH().do(DeleteLine(nearest,self.fm.getDM()))
+
 
 
 class CircleMode(Mode):

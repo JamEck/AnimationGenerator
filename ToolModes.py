@@ -207,14 +207,14 @@ class CircleMode(Mode):
       self.selectedData = Vertex(self.em.mouse.pos)
 
   def onLeftHeld(self):
-    if self.selectedData:
+    if isinstance(self.selectedData, Vertex):
       rad = (self.selectedData.pos - self.em.mouse.pos).mag()
       rad = 1 if rad < 1 else int(rad)
       self.selectedData.draw(self.screen)
       pg.draw.circle(self.screen, (100,100,100), self.selectedData.pos.asTuple(), rad, 1)
 
   def onLeftRise(self):
-    if self.selectedData:
+    if isinstance(self.selectedData, Vertex):
       rad = (self.selectedData.pos - self.em.mouse.pos).mag()
       rad = 1 if rad < 1 else int(rad)
       action = [] if self.linked else [CreateVertex(self.selectedData,self.fm.getDM())]
@@ -233,7 +233,8 @@ class CircleMode(Mode):
   def onRightHeld(self):
     pass
   def onRightRise(self):
-    pass
+    nearest = self.fm.getDM().findNearestCircle(self.em.mouse.pos,10)
+    if nearest: self.fm.getAH().do(DeleteCircle(nearest,self.fm.getDM()))
 
 
 class PillMode(Mode):

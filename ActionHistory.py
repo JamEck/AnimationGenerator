@@ -46,7 +46,6 @@ class Action(object):
     super(Action, self).__init__()
     self.data = obj
     self.dataMan = dataMan
-    self.ind = -1
 
 class Creation(Action):
   """docstring for Creation"""
@@ -86,6 +85,7 @@ class DeleteVertex(Action):
     for each in self.deleteList:
       self.dataMan.add(each)
 
+
 class CreateLine(Creation):
   """docstring for CreateLine"""
   def __init__(self, lineObj, dataMan):
@@ -96,6 +96,33 @@ class CreateCircle(Creation):
   """docstring for CreateCircle"""
   def __init__(self, circObj, dataMan):
     super(CreateCircle, self).__init__(circObj, dataMan)
+
+
+class DeleteCircle(Action):
+  """docstring for DeleteCircle"""
+  def __init__(self, circObj, dataMan):
+    self.circle = circObj
+    self.pills = dataMan.getPillWith(circObj)
+    self.survingCircles = [
+      each.circle2
+      if self.circle == each.circle1 else
+      each.circle1 for each in self.pills
+    ]
+    super(DeleteCircle, self).__init__((self.circle, self.survingCircles, self.pills), dataMan)
+
+  def do(self):
+    for each in self.pills:
+      self.dataMan.remove(each)
+    self.dataMan.remove(self.circle)
+    for each in self.survingCircles:
+      each.visible = True
+
+  def undo(self):
+    self.dataMan.add(self.circle)
+    for each in self.pills:
+      self.dataMan.add(each)
+    for each in self.survingCircles:
+      each.visible = False
 
 
 class CreatePill(Creation):

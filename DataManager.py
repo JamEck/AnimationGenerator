@@ -9,27 +9,29 @@ class DataManager(object):
     self.circles = list()
     self.pills  = list()
     self.font = pg.font.SysFont("monospace", 20)
+    self.dataMap = {
+      Vertex : self.vertices,
+      Line   : self.lines   ,
+      Circle : self.circles ,
+      Pill   : self.pills
+    }
 
   def add(self, item):
-    if  (isinstance(item, Vertex)): self.assign(item, self.vertices)
-    elif(isinstance(item, Line  )): self.assign(item, self.   lines)
-    elif(isinstance(item, Circle)): self.assign(item, self. circles)
-    elif(isinstance(item, Pill  )): self.assign(item, self.   pills)
-    else: print("Improper input type!")
+    try:
+      self.assign(item, self.dataMap[type(item)])
+    except Exception:
+      print("Improper input type! ({})".format(type(item)))
 
   def remove(self, item):
-    if  (isinstance(item, Vertex)): self.vertices.remove(item)
-    elif(isinstance(item, Line  )): self.   lines.remove(item)
-    elif(isinstance(item, Circle)): self. circles.remove(item)
-    elif(isinstance(item, Pill  )): self.   pills.remove(item)
-    else: print("Improper input type!")
+    try:
+      self.dataMap[type(item)].remove(item)
+    except Exception:
+      print("Improper input type! ({})".format(type(item)))
 
   def copy(self):
     dm = DataManager()
-    for each in self.vertices: dm.vertices.append(each.copy())
-    for each in self.lines   : dm.lines   .append(each.copy())
-    for each in self.circles : dm.circles .append(each.copy())
-    for each in self.pills   : dm.pills   .append(each.copy())
+    for these,those in zip(self.dataMap.values(), dm.dataMap.values()):
+      for each in these: those.append(each.copy())
     self._link(dm)
     return dm
 
@@ -64,11 +66,14 @@ class DataManager(object):
     for i,item in enumerate(array):
       item.id = i
 
-  def get(self, key):
-    if  (key == "vertex"): return self.vertices
-    elif(key ==   "line"): return self.lines
-    elif(key == "circle"): return self.circles
-    elif(key ==   "pill"): return self.pills
+  def get(self, cls):
+    try:
+      cls.__name__
+      return self.dataMap[cls]
+    except AttributeError:
+      print("Input is not a class type")
+    except Exception:
+      print("Improper input type! ({})".format(cls))
     return None
 
   @staticmethod

@@ -1,5 +1,4 @@
 import math
-from cv2 import TermCriteria_COUNT
 import pygame as pg
 
 class COLOR:

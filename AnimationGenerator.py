@@ -20,7 +20,6 @@ em = EventManager()
 fm = FrameManager()
 mi = ModeSelector(fm,em,screen) # Mode Indicator GUI
 
-
 nearest = None
 while em.running:
   # time.sleep(0.1) # slow loop for debugging

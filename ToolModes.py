@@ -362,7 +362,8 @@ class ModeSelector(object):
 
     # Choose Tool Mode With Keyboard #
     for mode in ModeSelector.MODES:
-      if em.keyboard[mode.BINDING].checkFall(): self.swapModeByClass(mode)
+      if em.keyboard[mode.BINDING].checkFall():
+        self.swapModeByClass(mode)
     if em.keyboard[pg.K_ESCAPE].checkFall():
       self.currMode.reset()
     ##################################

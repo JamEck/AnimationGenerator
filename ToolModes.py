@@ -336,10 +336,10 @@ class ModeSelector(object):
   def swapMode(self, mode):
       self.currMode.reset()
       self.uibuttons[type(self.currMode)].resetUpColor()
-      self.uibuttons[type(self.currMode)].resetTextColor()
+      self.uibuttons[type(self.currMode)].text.resetColor()
       self.currMode = mode
       self.uibuttons[type(mode)].setUpColor(COLOR.YELLOW)
-      self.uibuttons[type(mode)].setTextColor(COLOR.BLACK)
+      self.uibuttons[type(mode)].text.setColor(COLOR.BLACK)
 
   def swapModeByClass(self, cls):
     self.swapMode(self.uibuttons[cls].dataRise)

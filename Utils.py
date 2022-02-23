@@ -10,73 +10,11 @@ class COLOR:
   MAGENTA = (0xFF, 0x00, 0xFF)
   YELLOW  = (0xFF, 0xFF, 0x00)
   WHITE   = (0xFF, 0xFF, 0xFF)
+  GREY    = (0x7F, 0x7F, 0x7F)
+
 
 def sign(boolean):
   return 1 if boolean else -1
-
-
-class TextBox(object):
-  BORDER_BUFFER = 3
-  DEFAULT_TEXT_COLOR = COLOR.WHITE
-  DEFAULT_BOX_COLOR  = COLOR.BLACK
-
-  def __init__(self, text = str(), dim = (100,50), pos = (0,0)):
-    self.font = None
-    self.dim  = Vec2(dim)
-    self.pos  = Vec2(pos)
-    self.text = text
-    self.drawBox  = True
-    self.color    = TextBox.DEFAULT_TEXT_COLOR
-    self.boxColor = TextBox.DEFAULT_BOX_COLOR
-    self.setText(text)
-
-  def fitFontSizeToDims(self):
-    letterCount = len(self.text)
-    if letterCount == 0: letterCount = 1
-    fontsize = int((self.dim.x - TextBox.BORDER_BUFFER) / letterCount * 8 / 5)
-    fontsize = min(fontsize, self.dim.y - TextBox.BORDER_BUFFER)
-    self.font = pg.font.SysFont("monospace", fontsize)
-    self.updateTextRender()
-
-  def toggleOutline(self, inp):
-    self.drawBox = inp
-
-  def setTextColor(self, color):
-    self.color = color
-    self.updateTextRender()
-
-  def setBoxColor(self, color):
-    self.boxColor = color
-
-  def resetTextColor(self):
-    self.setTextColor(TextBox.DEFAULT_TEXT_COLOR)
-
-  def resetBoxColor(self):
-    self.setBoxColor(TextBox.DEFAULT_BOX_COLOR)
-
-  def updateTextRender(self):
-    self.textrender = self.font.render(self.text, 0, self.color)
-
-  def setText(self, text):
-    self.text = text
-    self.fitFontSizeToDims()
-    self.updateTextRender()
-  
-  def setDim(self,w,h):
-    self.dim = Vec2(w,h)
-    self.fitFontSizeToDims()
-    self.updateTextRender()
-
-  def incDim(self,w,h):
-    self.dim.iadd(w,h)
-    self.fitFontSizeToDims()
-    self.updateTextRender()
-
-  def draw(self, screen):
-    pos = self.pos + (TextBox.BORDER_BUFFER,0)
-    pg.draw.rect(screen, self.boxColor, (self.pos.asTuple(), self.dim.asTuple()), sign(self.drawBox))
-    if self.text:
-      screen.blit(self.textrender, pos.asTuple())
 
 
 class Vec2(object):

@@ -8,6 +8,7 @@ from Geometry     import *
 from DataManager  import DataManager
 from ToolModes    import *
 from FrameManager import *
+from Text import *
 import time
 
 pg.init()
@@ -37,6 +38,7 @@ while em.running:
       else:
         fm.currFrame.ah.undo()
   #############
+
 
   fm.draw(screen)
   mi.draw(screen)

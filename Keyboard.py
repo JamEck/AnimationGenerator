@@ -5,9 +5,10 @@ class Keyboard(object):
   """Wrapper for SDL Mouse Control"""
 
   keyList = [
-    pg.K_s, pg.K_v, pg.K_l, pg.K_c, pg.K_p, pg.K_z,
-    pg.K_ESCAPE, pg.K_LCTRL, pg.K_LSHIFT,
-    pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN
+    pg.K_s, pg.K_v, pg.K_l, pg.K_c, pg.K_p, pg.K_z, pg.K_w,
+    pg.K_ESCAPE, pg.K_LCTRL, pg.K_LSHIFT, pg.K_RETURN,
+    pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN,
+    pg.K_BACKQUOTE
   ]
   dummyBtn = Button()
 

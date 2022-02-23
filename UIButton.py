@@ -2,6 +2,7 @@ from typing import Iterable
 import pygame as pg
 from setuptools import setup
 from Utils import *
+from Text import *
 from Mouse import Mouse
 
 class UIButton(Button, TextBox):
@@ -78,4 +79,4 @@ class UIButton(Button, TextBox):
     TextBox.draw(self, screen)
 
   def __str__(self):
-    return "Pos: {}, Dim: {}, Text: \"{}\"".format(self.pos.asTuple(), self.dim.asTuple(), self.text)
+    return "Pos: {}, Dim: {}, Text: \"{}\"".format(self.pos.asTuple(), self.dim.asTuple(), self.text.text)

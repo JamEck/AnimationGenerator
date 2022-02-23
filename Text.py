@@ -98,3 +98,23 @@ class TextBox(object):
 
   def __bool__(self):
     return self.text.__bool__()
+
+
+class TextEntryBox(object):
+
+  DEFAULT_HINT = "Text Entry"
+
+  def __init__(self, text = str(), hint = None, dim = (100,50), pos = (0,0)):
+    if hint is None:
+      hint = TextEntryBox.DEFAULT_HINT
+    self.input = TextBox(text, dim, pos)
+    self.hint  = TextBox(hint, dim, pos)
+
+  def getInput(self, em):
+    pass
+
+  def draw(self, screen):
+    if self.input:
+      self.input.draw(screen)
+    else:
+      self.hint.draw(screen)

@@ -32,11 +32,8 @@ while em.running:
   fm.update(em)
   mi.update(em)
 
-  if em.textEntry.checkFall():
-    consoleDisplay.input.setText(em.getTextEntryPreview())
-
-  if em.textEntry.checkEnter():
-    print(em.textEntry)
+  if em.console.checkExecute():
+    print(em.console.textEntry)
 
   # Undo/Redo #
   if em.keyboard[pg.K_z].checkFall():
@@ -48,8 +45,8 @@ while em.running:
   #############
 
 
-  if (em.textEntry):
-    consoleDisplay.draw(screen)
+  if (em.console.isActive()):
+    em.console.draw(screen)
 
   fm.draw(screen)
   mi.draw(screen)

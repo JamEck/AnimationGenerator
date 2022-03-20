@@ -360,6 +360,8 @@ class SelectMode(Mode):
 
   def runFromConsole(self, cmdLine):
     print(cmdLine)
+    if self.selectedData == None:
+      raise AssertionError("No Geometry Selected")
     parts = [each for each in cmdLine.split(' ') if each]
     funcName = parts[0]
     cmdSuite = SelectMode.GEOM_TO_MODE[type(self.selectedData)].CONSOLE_CMDS
@@ -406,9 +408,14 @@ class ModeSelector(object):
       cmdLine = em.console.getTextEntry()
       if cmdLine:
         try:
-          self.currMode.runFromConsole(cmdLine)
-        except KeyError as exp:
-          print("Command not found: " + str(exp))
+          if cmdLine.startswith('>'):
+            exec(cmdLine[1:])
+          else:
+            self.currMode.runFromConsole(cmdLine)
+        except IndexError as ie:
+          print("No Data To Operate On: " + str(ie))
+        except KeyError as ke:
+          print("Command not found: " + str(ke))
         except Exception as exp:
           print("{}: {}".format(type(exp).__name__, str(exp)))
 

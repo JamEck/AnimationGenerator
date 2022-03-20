@@ -15,6 +15,7 @@ class Mode(object):
     self.screen = screen
     self.tempData = None
     self.selectedData = None
+    self.cmds = dict()
 
   def reset(self):
     self.tempData = None
@@ -43,60 +44,24 @@ class Mode(object):
         return self.tempData
     return None
 
-class SelectMode(Mode):
-  """docstring for SelectMode"""
-  NAME = "Select"
-  BINDING = pg.K_s
-
-  def __init__(self, frame, em, screen):
-    super(SelectMode, self).__init__(frame, em, screen)
-
-  def onHover(self):
-    self.findNearest("vlcp")
-    if self.selectedData:
-      self.selectedData.printAttr(self.screen)
-
-  def onLeftFall(self):
-    self.selectedData = self.tempData
-
-  def onLeftHeld(self):
-    if self.selectedData:
-      if   isinstance(self.selectedData, Vertex):
-        pg.draw.line(self.screen, (100,100,100), self.selectedData.pos.asTuple(), self.em.mouse.pos.asTuple())
-        pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
-      elif isinstance(self.selectedData, Circle):
-        pg.draw.line(self.screen, (100,100,100), self.selectedData.center.pos.asTuple(), self.em.mouse.pos.asTuple())
-        pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
-
-  def onLeftRise(self):
-    if self.selectedData:
-      if   isinstance(self.selectedData, Vertex):
-        self.fm.getAH().do(MoveVertex(self.selectedData, self.em.mouse.pos, self.fm.getDM()))
-      elif isinstance(self.selectedData, Circle):
-        newRad = (self.em.mouse.pos - self.selectedData.center.pos).mag()
-        self.fm.getAH().do(ResizeCircle(self.selectedData, newRad, self.fm.getDM()))
-
-  def onMiddleFall(self):
-    pass
-  def onMiddleHeld(self):
-    pass
-  def onMiddleRise(self):
-    pass
-  def onRightFall(self):
-      self.selectedData = self.tempData
-  def onRightHeld(self):
-    pass
-  def onRightRise(self):
-    pass
-
+  def runFromConsole(self, cmdLine, targetData):
+    print(cmdLine)
+    parts = [each for each in cmdLine.split(' ') if each]
+    funcName = parts[0]
+    action = self.cmds[funcName].buildFromConsole(parts[1:], targetData, self.fm.getDM())
+    self.fm.getAH().do(action)
 
 class VertexMode(Mode):
   """docstring for VertexMode"""
   NAME = "Vertex"
   BINDING = pg.K_v
+  CONSOLE_CMDS = {
+    "pos" : MoveVertex
+  }
 
   def __init__(self, frame, em, screen):
     super(VertexMode, self).__init__(frame, em, screen)
+    self.cmds = VertexMode.CONSOLE_CMDS
 
   def onHover(self):
     self.findNearest('v')
@@ -126,15 +91,21 @@ class VertexMode(Mode):
     nearest = self.fm.getDM().findNearestVertex(self.em.mouse.pos,10)
     if nearest: self.fm.getAH().do(DeleteVertex(nearest,self.fm.getDM()))
 
+  def runFromConsole(self, cmdLine):
+    super(VertexMode, self).runFromConsole(cmdLine, self.fm.getDM().vertices[-1])
 
 class LineMode(Mode):
   """docstring for LineMode"""
   NAME = "Line"
   BINDING = pg.K_l
+  CONSOLE_CMDS = {
+    "len" : SetLineMaxLen
+  }
 
   def __init__(self, frame, em, screen):
     super(LineMode, self).__init__(frame, em, screen)
     self.linked = False
+    self.cmds = LineMode.CONSOLE_CMDS
 
   def reset(self):
     super().reset()
@@ -183,6 +154,8 @@ class LineMode(Mode):
     nearest = self.fm.getDM().findNearestLine(self.em.mouse.pos,10)
     if nearest: self.fm.getAH().do(DeleteLine(nearest,self.fm.getDM()))
 
+  def runFromConsole(self, cmdLine):
+    super(LineMode, self).runFromConsole(cmdLine, self.fm.getDM().lines[-1])
 
 
 class CircleMode(Mode):
@@ -237,6 +210,9 @@ class CircleMode(Mode):
   def onRightRise(self):
     nearest = self.fm.getDM().findNearestCircle(self.em.mouse.pos,10)
     if nearest: self.fm.getAH().do(DeleteCircle(nearest,self.fm.getDM()))
+
+  def runFromConsole(self, cmdLine):
+    super(CircleMode, self).runFromConsole(cmdLine, self.fm.getDM().circles[-1])
 
 
 class PillMode(Mode):
@@ -321,6 +297,71 @@ class PillMode(Mode):
   def onRightRise(self):
     pass
 
+  def runFromConsole(self, cmdLine):
+    super(PillMode, self).runFromConsole(cmdLine, self.fm.getDM().pills[-1])
+
+
+class SelectMode(Mode):
+  """docstring for SelectMode"""
+  NAME = "Select"
+  BINDING = pg.K_s
+  GEOM_TO_MODE = {
+    Vertex : VertexMode,
+    Line   : LineMode,
+    Circle : CircleMode,
+    Pill   : PillMode,
+  }
+
+
+  def __init__(self, frame, em, screen):
+    super(SelectMode, self).__init__(frame, em, screen)
+
+  def onHover(self):
+    self.findNearest("vlcp")
+    if self.selectedData:
+      self.selectedData.printAttr(self.screen)
+
+  def onLeftFall(self):
+    self.selectedData = self.tempData
+
+  def onLeftHeld(self):
+    if self.selectedData:
+      if   isinstance(self.selectedData, Vertex):
+        pg.draw.line(self.screen, (100,100,100), self.selectedData.pos.asTuple(), self.em.mouse.pos.asTuple())
+        pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+      elif isinstance(self.selectedData, Circle):
+        pg.draw.line(self.screen, (100,100,100), self.selectedData.center.pos.asTuple(), self.em.mouse.pos.asTuple())
+        pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+
+  def onLeftRise(self):
+    if self.selectedData:
+      if   isinstance(self.selectedData, Vertex):
+        self.fm.getAH().do(MoveVertex(self.selectedData, self.em.mouse.pos, self.fm.getDM()))
+      elif isinstance(self.selectedData, Circle):
+        newRad = (self.em.mouse.pos - self.selectedData.center.pos).mag()
+        self.fm.getAH().do(ResizeCircle(self.selectedData, newRad, self.fm.getDM()))
+
+  def onMiddleFall(self):
+    pass
+  def onMiddleHeld(self):
+    pass
+  def onMiddleRise(self):
+    pass
+  def onRightFall(self):
+      self.selectedData = self.tempData
+  def onRightHeld(self):
+    pass
+  def onRightRise(self):
+    pass
+
+  def runFromConsole(self, cmdLine):
+    print(cmdLine)
+    parts = [each for each in cmdLine.split(' ') if each]
+    funcName = parts[0]
+    cmdSuite = SelectMode.GEOM_TO_MODE[type(self.selectedData)].CONSOLE_CMDS
+    action = cmdSuite[funcName].buildFromConsole(parts[1:], self.selectedData, self.fm.getDM())
+    self.fm.getAH().do(action)
+
 
 class ModeSelector(object):
   """docstring for ModeSelector"""
@@ -357,6 +398,16 @@ class ModeSelector(object):
       val.onRise = self.swapMode
 
   def update(self, em):
+    if em.console.checkExecute():
+      cmdLine = em.console.getTextEntry()
+      if cmdLine:
+        try:
+          self.currMode.runFromConsole(cmdLine)
+        except KeyError as exp:
+          print("Command not found: " + str(exp))
+        except Exception as exp:
+          print("{}: {}".format(str(type(exp)), str(exp)))
+
     for key,but in self.uibuttons.items():
       but.update(em.mouse)
 

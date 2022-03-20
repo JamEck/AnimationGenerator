@@ -21,8 +21,6 @@ em = EventManager()
 fm = FrameManager()
 mi = ModeSelector(fm,em,screen) # Mode Indicator GUI
 
-consoleDisplay = TextEntryBox(dim = (1280,30), pos = (0,930))
-
 nearest = None
 while em.running:
   # time.sleep(0.1) # slow loop for debugging
@@ -32,8 +30,6 @@ while em.running:
   fm.update(em)
   mi.update(em)
 
-  if em.console.checkExecute():
-    print(em.console.textEntry)
 
   # Undo/Redo #
   if em.keyboard[pg.K_z].checkFall():
@@ -43,7 +39,6 @@ while em.running:
       else:
         fm.currFrame.ah.undo()
   #############
-
 
   if (em.console.isActive()):
     em.console.draw(screen)

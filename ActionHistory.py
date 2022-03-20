@@ -1,4 +1,5 @@
 from DataManager import DataManager
+from Utils import Vec2
 
 class ActionHistory(object):
   """Used for Undo/Redo"""
@@ -159,6 +160,17 @@ class MoveVertex(Action):
     self.data.pos = self.oldPos
     for each in self.dataMan.getPillWith(self.data): each.update()
 
+  @classmethod
+  def buildFromConsole(cls, args, vertObj, dataMan):
+    if len(args) < 2:
+      raise AssertionError(cls.__name__ + " Command Requires Two Integer Arguments")
+    val = None
+    try:
+      val = Vec2(int(args[0]), int(args[1]))
+      return MoveVertex(vertObj, val, dataMan)
+    except Exception as e:
+      raise AssertionError(e)
+
 class ResizeCircle(Action):
   """docstring for ResizeCircle"""
   def __init__(self, circObj, newRad, dataMan):
@@ -174,3 +186,29 @@ class ResizeCircle(Action):
   def undo(self):
     self.data.rad = self.oldRad
     for each in self.dataMan.getPillWith(self.data): each.update()
+
+class SetLineMaxLen(Action):
+  def __init__(self, lineObj, maxlen, dataMan):
+    super(SetLineMaxLen, self).__init__(lineObj, dataMan)
+    self.prevmaxlen = lineObj.maxlen
+    self.maxlen = maxlen
+    self.moveVert = MoveVertex(self.data.p1, self.data.p1.pos, self.dataMan)
+
+  def do(self):
+    self.data.maxlen = self.maxlen
+    self.moveVert.do()
+
+  def undo(self):
+    self.data.maxlen = self.prevmaxlen
+    self.moveVert.undo()
+
+  @classmethod
+  def buildFromConsole(cls, args, lineObj, dataMan):
+    if len(args) < 1:
+      raise AssertionError(cls.__name__ + " Command Requires An Integer Argument")
+    val = 0
+    try:
+      val = int(args[0])
+      return SetLineMaxLen(lineObj, val, dataMan)
+    except Exception as e:
+      raise AssertionError(e)

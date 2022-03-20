@@ -38,9 +38,12 @@ class Keyboard(object):
 
 class TextEntry:
   def __init__(self):
-    self.active = False
-    self.buffer = list()
-    self.result = str()
+    self.active     = False
+    self.buffer     = list()
+    self.tempbuffer = list()
+    self.result     = str()
+    self.history    = list()
+    self.historyIndex = -1
     self.clearTriggers()
 
   def start(self):
@@ -49,12 +52,28 @@ class TextEntry:
 
   def cancel(self):
     self.buffer = list()
+    self.historyIndex = -1
     self.active = False
 
   def enter(self):
     self.result = self.preview()
     self.enterTrig = True
+    self.history.insert(0, self.buffer.copy())
+    self.historyIndex = -1
     self.cancel()
+
+  def historyBack(self):
+    if self.historyIndex == -1:
+      self.tempbuffer = self.buffer.copy()
+    self.historyIndex = min(self.historyIndex + 1, len(self.history) - 1)
+    self.buffer = self.history[self.historyIndex].copy()
+
+  def historyForward(self):
+    self.historyIndex = max(self.historyIndex - 1, -1)
+    if self.historyIndex == -1:
+      self.buffer = self.tempbuffer.copy()
+    else:
+      self.buffer = self.history[self.historyIndex].copy()
 
   def get(self):
     return str(self)
@@ -80,6 +99,12 @@ class TextEntry:
         return
       elif event.key == pg.K_BACKSPACE:
         self.backspace()
+        return
+      elif event.key == pg.K_UP:
+        self.historyBack()
+        return
+      elif event.key == pg.K_DOWN:
+        self.historyForward()
         return
       elif event.unicode:
         self.append(event.unicode)

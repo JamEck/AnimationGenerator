@@ -37,6 +37,8 @@ class Keyboard(object):
 
 
 class TextEntry:
+  HISTORY_LEN = 20
+
   def __init__(self):
     self.active     = False
     self.buffer     = list()
@@ -58,8 +60,11 @@ class TextEntry:
   def enter(self):
     self.result = self.preview()
     self.enterTrig = True
-    self.history.insert(0, self.buffer.copy())
     self.historyIndex = -1
+    if len(self.buffer) > 0:
+      self.history.insert(0, self.buffer.copy())
+      if len(self.history) > TextEntry.HISTORY_LEN:
+        del self.history[-1]
     self.cancel()
 
   def historyBack(self):

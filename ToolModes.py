@@ -99,7 +99,8 @@ class LineMode(Mode):
   NAME = "Line"
   BINDING = pg.K_l
   CONSOLE_CMDS = {
-    "len" : SetLineMaxLen
+    "len"    : SetLineLen,
+    "maxlen" : SetLineMaxLen,
   }
 
   def __init__(self, frame, em, screen):
@@ -162,10 +163,14 @@ class CircleMode(Mode):
   """docstring for CircleMode"""
   NAME = "Circle"
   BINDING = pg.K_c
+  CONSOLE_CMDS = {
+    "rad" : ResizeCircle
+  }
 
   def __init__(self, frame, em, screen):
     super(CircleMode, self).__init__(frame, em, screen)
     self.linked = False
+    self.cmds = CircleMode.CONSOLE_CMDS
 
   def reset(self):
     super().reset()
@@ -312,7 +317,6 @@ class SelectMode(Mode):
     Pill   : PillMode,
   }
 
-
   def __init__(self, frame, em, screen):
     super(SelectMode, self).__init__(frame, em, screen)
 
@@ -406,7 +410,7 @@ class ModeSelector(object):
         except KeyError as exp:
           print("Command not found: " + str(exp))
         except Exception as exp:
-          print("{}: {}".format(str(type(exp)), str(exp)))
+          print("{}: {}".format(type(exp).__name__, str(exp)))
 
     for key,but in self.uibuttons.items():
       but.update(em.mouse)

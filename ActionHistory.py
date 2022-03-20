@@ -1,6 +1,30 @@
 from DataManager import DataManager
 from Utils import Vec2
 
+def checkArgCount(args, n):
+  if len(args) < n:
+    raise AssertionError("Command Requires {} Arguments".format(n))
+
+def castInt(item):
+    try:
+      val = int(item)
+      return val
+    except Exception as e:
+      raise ValueError("Could Not Cast \"{}\" To Int".format(str(item)))
+
+def assertRange(val, lower, upper):
+  if val < lower or val > upper:
+    raise AssertionError("Value ({}) Must Be In Range [{},{}]".format(val, lower, upper))
+
+def assertMin(val, minim):
+  if val < minim:
+    raise AssertionError("Value ({}) Must Be At Least {}".format(val, minim))
+
+def assertMax(val, maxi):
+  if val > maxi:
+    raise AssertionError("Value ({}) Must Be At Most {}".format(val, maxi))
+
+
 class ActionHistory(object):
   """Used for Undo/Redo"""
   def __init__(self):
@@ -187,12 +211,19 @@ class ResizeCircle(Action):
     self.data.rad = self.oldRad
     for each in self.dataMan.getPillWith(self.data): each.update()
 
+  @staticmethod
+  def buildFromConsole(args, circObj, dataMan):
+    checkArgCount(args, 1)
+    rad = castInt(args[0])
+    assertMin(rad, 1)
+    return ResizeCircle(circObj, rad, dataMan)
+
 class SetLineMaxLen(Action):
   def __init__(self, lineObj, maxlen, dataMan):
     super(SetLineMaxLen, self).__init__(lineObj, dataMan)
     self.prevmaxlen = lineObj.maxlen
     self.maxlen = maxlen
-    self.moveVert = MoveVertex(self.data.p1, self.data.p1.pos, self.dataMan)
+    self.moveVert = MoveVertex(self.data.p2, self.data.p2.pos, self.dataMan)
 
   def do(self):
     self.data.maxlen = self.maxlen
@@ -202,13 +233,28 @@ class SetLineMaxLen(Action):
     self.data.maxlen = self.prevmaxlen
     self.moveVert.undo()
 
-  @classmethod
-  def buildFromConsole(cls, args, lineObj, dataMan):
-    if len(args) < 1:
-      raise AssertionError(cls.__name__ + " Command Requires An Integer Argument")
-    val = 0
-    try:
-      val = int(args[0])
-      return SetLineMaxLen(lineObj, val, dataMan)
-    except Exception as e:
-      raise AssertionError(e)
+  @staticmethod
+  def buildFromConsole(args, lineObj, dataMan):
+    checkArgCount(args, 1)
+    maxLen = castInt(args[0])
+    assertMin(maxLen, 0)
+    return SetLineMaxLen(lineObj, maxLen, dataMan)
+
+class SetLineLen(Action):
+  def __init__(self, lineObj, len, dataMan):
+    super(SetLineLen, self).__init__(lineObj, dataMan)
+    heading = lineObj.toVec().norm()
+    self.newpos = (lineObj.p1.pos + heading * len).toInt()
+    self.moveVert = MoveVertex(self.data.p2, self.newpos, self.dataMan)
+
+  def do(self):
+    self.moveVert.do()
+
+  def undo(self):
+    self.moveVert.undo()
+
+  @staticmethod
+  def buildFromConsole(args, lineObj, dataMan):
+    checkArgCount(args, 1)
+    len = castInt(args[0])
+    return SetLineLen(lineObj, len, dataMan)

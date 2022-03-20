@@ -88,6 +88,8 @@ class Line(Geometry):
       if disp.mag() > self.maxlen:
         p.set(other.pos + disp.norm() * self.maxlen)
 
+  def toVec(self):
+    return self.p2.pos - self.p1.pos
 
 class Circle(Geometry):
   """docstring for Circle"""

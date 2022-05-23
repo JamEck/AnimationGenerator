@@ -6,8 +6,8 @@ class Keyboard(object):
   """Wrapper for SDL Mouse Control"""
 
   keyList = [
-    pg.K_s, pg.K_v, pg.K_l, pg.K_c, pg.K_p, pg.K_z, pg.K_w,
-    pg.K_ESCAPE, pg.K_LCTRL, pg.K_LSHIFT, pg.K_RETURN,
+    pg.K_s, pg.K_v, pg.K_i, pg.K_l, pg.K_c, pg.K_p, pg.K_z, pg.K_w, pg.K_d,
+    pg.K_ESCAPE, pg.K_LCTRL, pg.K_LSHIFT, pg.K_RETURN, pg.K_DELETE,
     pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN
   ]
   dummyBtn = Button()
@@ -46,7 +46,8 @@ class TextEntry:
     self.result     = str()
     self.history    = list()
     self.historyIndex = -1
-    self.clearTriggers()
+    self.keyTrig    = False
+    self.enterTrig  = False
 
   def start(self):
     self.active = True

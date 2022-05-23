@@ -1,6 +1,8 @@
 import math
 import pygame as pg
 
+SCREEN_SIZE = (1280,960)
+
 class COLOR:
   BLACK   = (0x00, 0x00, 0x00)
   BLUE    = (0x00, 0x00, 0xFF)
@@ -36,7 +38,7 @@ class Vec2(object):
     self.y = inp[1]
 
 
-  def add(self, x, y):
+  def addxy(self, x, y):
     return Vec2(self.x + x, self.y + y)
 
   def add(self, other):
@@ -108,6 +110,8 @@ class Vec2(object):
   def __truediv__(self, other):
     if isinstance(other, (int,float)):
       return Vec2(self.x / other, self.y / other)
+  def __floordiv__(self, other):
+      return Vec2(self.x // other, self.y // other)
 
   def angle(self):
     return math.atan2(self.y, self.x)
@@ -132,6 +136,21 @@ class Vec2(object):
   def norm(self):
     mag = self.mag()
     return self/mag if mag else Vec2(0,0)
+
+  def min(self, x, y):
+    return Vec2(max(self.x, x), max(self.y, y))
+
+  def imin(self, x, y):
+    self.x = max(self.x, x)
+    self.y = max(self.y, y)
+
+  def max(self, x, y):
+    return Vec2(min(self.x, x), min(self.y, y))
+
+  def imax(self, x, y):
+    self.x = min(self.x, x)
+    self.y = min(self.y, y)
+
 
   def asTuple(self):
     return (self.x, self.y)

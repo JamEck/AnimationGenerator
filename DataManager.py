@@ -1,13 +1,14 @@
 from Geometry import *
+from Image import Image
 
 class DataManager(object):
   """docstring for DataManager"""
   def __init__(self):
     super(DataManager, self).__init__()
-    self.vertices  = list()
+    self.vertices = list()
     self.lines    = list()
-    self.circles = list()
-    self.pills  = list()
+    self.circles  = list()
+    self.pills    = list()
     self.font = pg.font.SysFont("monospace", 20)
     self.dataMap = {
       Vertex : self.vertices,
@@ -15,6 +16,7 @@ class DataManager(object):
       Circle : self.circles ,
       Pill   : self.pills
     }
+    self.image = None
 
   def add(self, item):
     try:
@@ -75,6 +77,10 @@ class DataManager(object):
     except Exception:
       print("Improper input type! ({})".format(cls))
     return None
+
+  def loadImageDrop(self, file_drop):
+    self.image = Image(file_drop.path)
+    self.image.pos = file_drop.pos
 
   @staticmethod
   def sqDist(p1,p2):
@@ -206,6 +212,10 @@ class DataManager(object):
 
     return results
 
+  def draw_image(self, screen):
+    if self.image != None:
+      self.image.draw(screen)
+
   def draw(self, screen, color = None):
     if color == None: color = (255,255,255)
     for p in self.pills:
@@ -218,11 +228,12 @@ class DataManager(object):
       v.draw(screen, color)
 
   def drawInfo(self, screen):
+    pos = Vec2(20,80)
     text = self.font.render("Vertices| " + str(len(self.vertices)), 0, (255,255,255))
-    screen.blit(text, (20, 80))
+    screen.blit(text, pos.asTuple()); pos.y += 20
     text = self.font.render("Lines   | " + str(len(self.lines   )), 0, (255,255,255))
-    screen.blit(text, (20, 100))
+    screen.blit(text, pos.asTuple()); pos.y += 20
     text = self.font.render("Circles | " + str(len(self.circles )), 0, (255,255,255))
-    screen.blit(text, (20, 120))
+    screen.blit(text, pos.asTuple()); pos.y += 20
     text = self.font.render("Pills   | " + str(len(self.pills   )), 0, (255,255,255))
-    screen.blit(text, (20, 140))
+    screen.blit(text, pos.asTuple())

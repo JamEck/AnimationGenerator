@@ -13,7 +13,7 @@ import time
 
 pg.init()
 
-screen = pg.display.set_mode((1280,960))
+screen = pg.display.set_mode(SCREEN_SIZE)
 pg.display.set_caption("Animation Tool")
 
 em = EventManager()

@@ -16,31 +16,43 @@ class Mode(object):
     self.tempData = None
     self.selectedData = None
     self.cmds = dict()
+    self.doLaters = list()
+
+  def doLater(self, func, *params):
+    self.doLaters.append((func, params))
 
   def reset(self):
     self.tempData = None
     self.selectedData = None
 
-  def findNearest(self, items): # items "vlcp"
+  def findNearest(self, items): # items "vlcpi"
     if 'v' in items:
       self.tempData = self.fm.getDM().findNearestVertex(self.em.mouse.pos,10)
       if self.tempData:
-        pg.draw.rect(self.screen, (100,100,100), ((self.tempData.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+        self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.tempData.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
         return self.tempData
     if 'l' in items:
       self.tempData = self.fm.getDM().findNearestLine(self.em.mouse.pos,10)
       if self.tempData:
-        pg.draw.rect(self.screen, (100,100,100), ((self.tempData.midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
+        self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.tempData.midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
         return self.tempData
     if 'p' in items:
       self.tempData = self.fm.getDM().findNearestPill(self.em.mouse.pos,10)
       if self.tempData:
-        pg.draw.rect(self.screen, (100,100,100), ((self.tempData.getAxis().midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
+        self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.tempData.getAxis().midpoint() - Vec2(5,5)).asTuple(), (10,10)), 1)
         return self.tempData
     if 'c' in items:
       self.tempData = self.fm.getDM().findNearestCircle(self.em.mouse.pos,10)
       if self.tempData:
-        pg.draw.rect(self.screen, (100,100,100), ((self.tempData.nearestPoint(self.em.mouse.pos) - Vec2(5,5)).asTuple(), (10,10)), 1)
+        self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.tempData.nearestPoint(self.em.mouse.pos) - Vec2(5,5)).asTuple(), (10,10)), 1)
+        return self.tempData
+    if 'i' in items:
+      if self.fm.getDM().image != None:
+        if self.fm.getDM().image.contains_point(self.em.mouse.pos):
+          self.tempData = self.fm.getDM().image
+        else:
+          self.tempData = None
+          self.boxTemp = None
         return self.tempData
     return None
 
@@ -50,6 +62,77 @@ class Mode(object):
     funcName = parts[0]
     action = self.cmds[funcName].buildFromConsole(parts[1:], targetData, self.fm.getDM())
     self.fm.getAH().do(action)
+
+  def drawOverlay(self):
+    for func,params in self.doLaters:
+      func(*params)
+    self.doLaters.clear()
+
+class ImageMode(Mode):
+  """docstring for ImageMode"""
+  NAME = "Image"
+  BINDING = pg.K_i
+  CONSOLE_CMDS = {
+    "pos" : MoveImage,
+    "scale" : ScaleImage,
+    "reset" : ResetImage
+  }
+
+  def __init__(self, frame, em, screen):
+    super(ImageMode, self).__init__(frame, em, screen)
+    self.cmds = ImageMode.CONSOLE_CMDS
+    self.boxTemp = None
+    self.boxSel  = None
+
+  def makeBox(self, imgObj):
+    if imgObj == None:
+      return None
+    imgSize = imgObj.size()
+    return ((imgObj.pos - imgSize//2).asTuple(), imgSize.asTuple())
+
+  def onHover(self):
+    self.findNearest('i')
+    if self.tempData:
+      self.boxTemp = self.makeBox(self.tempData)
+      self.doLater(pg.draw.rect, self.screen, (255,255,255), self.boxTemp, 1)
+    if self.selectedData:
+      self.boxSel = self.makeBox(self.selectedData)
+      self.doLater(pg.draw.rect, self.screen, (255,255,0), self.boxSel, 1)
+
+      if self.em.keyboard[pg.K_DELETE].checkFall():
+        self.fm.getAH().do(ClearImage(self.selectedData, self.fm.getDM()))
+
+
+
+  def onLeftFall(self):
+    self.selectedData = self.tempData
+
+  def onLeftHeld(self):
+    if self.selectedData:
+      self.doLater(pg.draw.line, self.screen, (100,100,100), self.em.mouse.clickPos.asTuple(), self.em.mouse.pos.asTuple())
+      self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+
+  def onLeftRise(self):
+    if self.selectedData:
+      disp = self.em.mouse.pos - self.em.mouse.clickPos
+      self.fm.getAH().do(MoveImage(self.selectedData, self.selectedData.pos + disp, self.fm.getDM()))
+
+  def onMiddleFall(self):
+    pass
+  def onMiddleHeld(self):
+    pass
+  def onMiddleRise(self):
+    pass
+  def onRightFall(self):
+    pass
+  def onRightHeld(self):
+    pass
+
+  def onRightRise(self):
+    self.selectedData = self.findNearest('i')
+
+  def runFromConsole(self, cmdLine):
+    super(ImageMode, self).runFromConsole(cmdLine, self.fm.getDM().image)
 
 class VertexMode(Mode):
   """docstring for VertexMode"""
@@ -124,9 +207,9 @@ class LineMode(Mode):
 
   def onLeftHeld(self):
     if self.selectedData:
-      pg.draw.line(self.screen, (100,100,100), self.em.mouse.pos.asTuple(), self.selectedData.pos.asTuple())
-      pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
-      self.selectedData.draw(self.screen)
+      self.doLater(pg.draw.line, self.screen, (100,100,100), self.em.mouse.pos.asTuple(), self.selectedData.pos.asTuple())
+      self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+      self.doLater(self.selectedData.draw, self.screen)
 
   def onLeftRise(self):
     if self.selectedData:
@@ -190,8 +273,8 @@ class CircleMode(Mode):
     if isinstance(self.selectedData, Vertex):
       rad = (self.selectedData.pos - self.em.mouse.pos).mag()
       rad = 1 if rad < 1 else int(rad)
-      self.selectedData.draw(self.screen)
-      pg.draw.circle(self.screen, (100,100,100), self.selectedData.pos.asTuple(), rad, 1)
+      self.doLater(self.selectedData.draw, self.screen)
+      self.doLater(pg.draw.circle, self.screen, (100,100,100), self.selectedData.pos.asTuple(), rad, 1)
 
   def onLeftRise(self):
     if isinstance(self.selectedData, Vertex):
@@ -241,8 +324,8 @@ class PillMode(Mode):
     self.findNearest("v")
     if not self.first:
       if not self.selectedData:
-        pg.draw.line(self.screen, (100,100,100), self.em.mouse.pos.asTuple(), self.geom.circle1.center.pos.asTuple())
-        self.geom.circle1.draw(self.screen)
+        self.doLater(pg.draw.line, self.screen, (100,100,100), self.em.mouse.pos.asTuple(), self.geom.circle1.center.pos.asTuple())
+        self.doLater(self.geom.circle1.draw, self.screen)
 
   def onLeftFall(self):
     self.selectedData = self.tempData
@@ -260,17 +343,17 @@ class PillMode(Mode):
 
   def onLeftHeld(self):
     if self.selectedData:
-      self.selectedData.draw(self.screen)
+      self.doLater(self.selectedData.draw, self.screen)
       rad = (self.selectedData.pos - self.em.mouse.pos).mag()
       rad = 1 if rad < 1 else int(rad)
       if self.first:
         self.geom.circle1.rad = rad
-        self.geom.circle1.draw(self.screen)
+        self.doLater(self.geom.circle1.draw, self.screen)
       else:
-        pg.draw.line(self.screen, (100,100,100), self.geom.circle1.center.pos.asTuple(), self.geom.circle2.center.pos.asTuple())
+        self.doLater(pg.draw.line, self.screen, (100,100,100), self.geom.circle1.center.pos.asTuple(), self.geom.circle2.center.pos.asTuple())
         self.geom.circle2.rad = rad
-        self.geom.circle1.draw(self.screen)
-        self.geom.circle2.draw(self.screen)
+        self.doLater(self.geom.circle1.draw, self.screen)
+        self.doLater(self.geom.circle2.draw, self.screen)
 
   def onLeftRise(self):
     if self.selectedData:
@@ -323,7 +406,7 @@ class SelectMode(Mode):
   def onHover(self):
     self.findNearest("vlcp")
     if self.selectedData:
-      self.selectedData.printAttr(self.screen)
+      self.doLater(self.selectedData.printAttr, self.screen)
 
   def onLeftFall(self):
     self.selectedData = self.tempData
@@ -331,11 +414,11 @@ class SelectMode(Mode):
   def onLeftHeld(self):
     if self.selectedData:
       if   isinstance(self.selectedData, Vertex):
-        pg.draw.line(self.screen, (100,100,100), self.selectedData.pos.asTuple(), self.em.mouse.pos.asTuple())
-        pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+        self.doLater(pg.draw.line, self.screen, (100,100,100), self.selectedData.pos.asTuple(), self.em.mouse.pos.asTuple())
+        self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
       elif isinstance(self.selectedData, Circle):
-        pg.draw.line(self.screen, (100,100,100), self.selectedData.center.pos.asTuple(), self.em.mouse.pos.asTuple())
-        pg.draw.rect(self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
+        self.doLater(pg.draw.line, self.screen, (100,100,100), self.selectedData.center.pos.asTuple(), self.em.mouse.pos.asTuple())
+        self.doLater(pg.draw.rect, self.screen, (100,100,100), ((self.em.mouse.pos - Vec2(5,5)).asTuple(), (10,10)), 1)
 
   def onLeftRise(self):
     if self.selectedData:
@@ -371,7 +454,7 @@ class SelectMode(Mode):
 
 class ModeSelector(object):
   """docstring for ModeSelector"""
-  MODES = [SelectMode, VertexMode, LineMode, CircleMode, PillMode]
+  MODES = [SelectMode, ImageMode, VertexMode, LineMode, CircleMode, PillMode]
 
   def __init__(self, fm, em, screen):
     super(ModeSelector, self).__init__()
@@ -450,3 +533,5 @@ class ModeSelector(object):
   def draw(self, screen):
     for key,but in self.uibuttons.items():
       but.draw(screen)
+
+    self.currMode.drawOverlay()

@@ -83,6 +83,17 @@ class Creation(Action):
   def undo(self):
     self.dataMan.remove(self.data)
 
+class LoadImage(Action):
+  """docstring for LoadImage"""
+  def __init__(self, imgDropObj, dataMan):
+    super(LoadImage, self).__init__(imgDropObj, dataMan)
+
+  def do(self):
+    self.dataMan.loadImageDrop(self.data)
+
+  def undo(self):
+    self.dataMan.image = None
+
 class CreateVertex(Creation):
   """docstring for CreateVertex"""
   def __init__(self, vertObj, dataMan):
@@ -168,12 +179,114 @@ class CreatePill(Creation):
     super(CreatePill, self).__init__(pillObj, dataMan)
 
 
-class MoveVertex(Action):
-  """docstring for MoveVertex"""
-  def __init__(self, vertObj, newPos, dataMan):
-    super(MoveVertex, self).__init__(vertObj, dataMan)
+class MoveItem(Action):
+  """docstring for MoveItem"""
+  def __init__(self, obj, newPos, dataMan):
+    super(MoveItem, self).__init__(obj, dataMan)
     self.oldPos = self.data.pos
     self.newPos = newPos.copy()
+
+
+class MoveImage(MoveItem):
+  """docstring for MoveImage"""
+  def __init__(self, imgObj, newPos, dataMan):
+    super(MoveImage, self).__init__(imgObj, newPos, dataMan)
+
+  def do(self):
+    self.data.pos = self.newPos.copy()
+
+  def undo(self):
+    self.data.pos = self.oldPos
+
+  @classmethod
+  def buildFromConsole(cls, args, imageObj, dataMan):
+    if len(args) < 2:
+      raise AssertionError(cls.__name__ + " Command Requires Two Integer Arguments")
+    try:
+      val = Vec2(int(args[0]), int(args[1]))
+      return MoveImage(imageObj, val, dataMan)
+    except Exception as e:
+      raise AssertionError(e)
+
+class ResetImage(Action):
+  """docstring for ResetImage"""
+  def __init__(self, imgObj, dataMan):
+    super(ResetImage, self).__init__(imgObj, dataMan)
+    self.OLD_visible = self.data.visible
+    self.OLD_pos     = self.data.pos
+    self.OLD_data    = self.data.data.copy()
+    self.OLD_scale   = self.data._scale
+
+  def do(self):
+    self.data.reset()
+
+  def undo(self):
+    self.data.visible = self.OLD_visible
+    self.data.pos     = self.OLD_pos
+    self.data.data    = self.OLD_data.copy()
+    self.data._scale  = self.OLD_scale
+
+  @classmethod
+  def buildFromConsole(cls, args, imageObj, dataMan):
+    if len(args) != 0:
+      raise AssertionError(cls.__name__ + " Command Takes No Arguments")
+    try:
+      return ResetImage(imageObj, dataMan)
+    except Exception as e:
+      raise AssertionError(e)
+
+class ClearImage(Action):
+  """docstring for ClearImage"""
+  def __init__(self, imgObj, dataMan):
+    super(ClearImage, self).__init__(imgObj.copy(), dataMan)
+
+  def do(self):
+    self.data.data = None
+    self.data.data_bkp = None
+    self.dataMan.image = None
+
+  def undo(self):
+    self.dataMan.image = Image(self.data.path)
+    self.dataMan.image.pos     = self.data.pos
+    self.dataMan.image.visible = self.data.visible
+    self.dataMan.image.data    = self.data.data.copy()
+    self.dataMan.image._scale  = self.data._scale
+
+  @classmethod
+  def buildFromConsole(cls, args, imageObj, dataMan):
+    if len(args) != 0:
+      raise AssertionError(cls.__name__ + " Command Takes No Arguments")
+    try:
+      return ClearImage(imageObj, dataMan)
+    except Exception as e:
+      raise AssertionError(e)
+
+class ScaleImage(Action):
+  """docstring for ScaleImage"""
+  def __init__(self, imgObj, newScale, dataMan):
+    super(ScaleImage, self).__init__(imgObj, dataMan)
+    self.oldScale = imgObj._scale
+    self.newScale = newScale
+
+  def do(self):
+    self.data.setScale(self.newScale)
+
+  def undo(self):
+    self.data.setScale(self.oldScale)
+
+  @classmethod
+  def buildFromConsole(cls, args, imageObj, dataMan):
+    if len(args) < 1:
+      raise AssertionError(cls.__name__ + " Command Requires One Integer Argument")
+    try:
+      return ScaleImage(imageObj, int(args[0]), dataMan)
+    except Exception as e:
+      raise AssertionError(e)
+
+class MoveVertex(MoveItem):
+  """docstring for MoveVertex"""
+  def __init__(self, vertObj, newPos, dataMan):
+    super(MoveVertex, self).__init__(vertObj, newPos, dataMan)
 
   def do(self):
     self.data.pos = self.newPos.copy()
@@ -188,7 +301,6 @@ class MoveVertex(Action):
   def buildFromConsole(cls, args, vertObj, dataMan):
     if len(args) < 2:
       raise AssertionError(cls.__name__ + " Command Requires Two Integer Arguments")
-    val = None
     try:
       val = Vec2(int(args[0]), int(args[1]))
       return MoveVertex(vertObj, val, dataMan)

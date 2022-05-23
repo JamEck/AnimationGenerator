@@ -1,5 +1,6 @@
 from DataManager import DataManager
 from ActionHistory import *
+import os
 import pygame as pg
 
 class Frame(object):
@@ -58,6 +59,11 @@ class FrameManager(object):
   def getAH(self):
     return self.currFrame.ah
 
+  def handleFileDrop(self, file_drop):
+    print("File Dropped: " + file_drop.path)
+    if os.path.splitext(file_drop.path)[-1].lower() == ".png":
+      self.currFrame.ah.do(LoadImage(file_drop, self.currFrame.dm))
+
   def update(self, em):
     if em.keyboard[pg.K_RIGHT].checkFall():
       self.next()
@@ -67,7 +73,12 @@ class FrameManager(object):
       if em.keyboard[pg.K_LCTRL].checkHeld():
         self.delete()
 
+    if em.file_drop != None:
+      self.handleFileDrop(em.file_drop)
+
   def draw(self, screen):
+    if self.fidx >= 0 and self.fidx < len(self.frames):
+      self.currFrame.dm.draw_image(screen)
     if self.fidx > 0:
       self.frames[self.fidx - 1].dm.draw(screen, (50,30,30))
     if self.fidx < len(self.frames) - 1:

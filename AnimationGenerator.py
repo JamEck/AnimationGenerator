@@ -19,7 +19,7 @@ pg.display.set_caption("Animation Tool")
 em = EventManager()
 
 fm = FrameManager()
-mi = ModeSelector(fm,em,screen) # Mode Indicator GUI
+ms = ModeSelector(fm,em,screen) # Mode Indicator GUI
 
 nearest = None
 while em.running:
@@ -28,23 +28,21 @@ while em.running:
 
   em.update()
   fm.update(em)
-  mi.update(em)
-
+  ms.update(em)
 
   # Undo/Redo #
-  if em.keyboard[pg.K_z].checkFall():
-    if em.keyboard[pg.K_LCTRL].checkHeld():
-      if em.keyboard[pg.K_LSHIFT].checkHeld():
-        fm.currFrame.ah.redo()
-      else:
-        fm.currFrame.ah.undo()
+  if em.keyboard[pg.K_z].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
+    if em.keyboard[pg.K_LSHIFT].checkHeld():
+      fm.currFrame.ah.redo()
+    else:
+      fm.currFrame.ah.undo()
   #############
 
   if (em.console.isActive()):
     em.console.draw(screen)
 
   fm.draw(screen)
-  mi.draw(screen)
+  ms.draw(screen)
 
   pg.display.update()
 

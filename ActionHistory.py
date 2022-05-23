@@ -370,3 +370,24 @@ class SetLineLen(Action):
     checkArgCount(args, 1)
     len = castInt(args[0])
     return SetLineLen(lineObj, len, dataMan)
+
+class CopyPrevFrame(Action):
+  def __init__(self, toolMode, dataMan):
+    super(CopyPrevFrame, self).__init__(toolMode, dataMan)
+    self.prevDataMan = toolMode.fm.frames[toolMode.fm.fidx-1].dm if toolMode.fm.fidx > 0 else dataMan
+    self.data_bkp = self.dataMan.copy()
+
+  def do(self):
+    self.data.reset()
+    self.dataMan.clear()
+    self.dataMan.copy_from(self.prevDataMan)
+
+  def undo(self):
+    self.data.reset()
+    self.dataMan.clear()
+    self.dataMan.copy_from(self.data_bkp)
+
+  @staticmethod
+  def buildFromConsole(args, toolMode, dataMan):
+    checkArgCount(args, 0)
+    return CopyPrevFrame(toolMode, dataMan)

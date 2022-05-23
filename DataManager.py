@@ -18,6 +18,12 @@ class DataManager(object):
     }
     self.image = None
 
+  def clear(self):
+    self.vertices.clear()
+    self.lines   .clear()
+    self.circles .clear()
+    self.pills   .clear()
+
   def add(self, item):
     try:
       self.assign(item, self.dataMap[type(item)])
@@ -36,6 +42,12 @@ class DataManager(object):
       for each in these: those.append(each.copy())
     self._link(dm)
     return dm
+
+  def copy_from(self, other):
+    for these,those in zip(self.dataMap.values(), other.dataMap.values()):
+      for each in those: 
+        these.append(each.copy())
+    other._link(self)
 
   def findByID(self, array, id):
     for each in array:

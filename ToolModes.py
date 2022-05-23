@@ -1,3 +1,4 @@
+import this
 import pygame as pg
 from Utils import *
 from ActionHistory import *
@@ -5,6 +6,7 @@ from EventManager import EventManager
 from Geometry import *
 from DataManager import DataManager
 from UIButton import UIButton
+import traceback as tb
 
 class Mode(object):
   """docstring for Mode"""
@@ -399,6 +401,9 @@ class SelectMode(Mode):
     Circle : CircleMode,
     Pill   : PillMode,
   }
+  CONSOLE_CMDS = {
+    "copyPrevFrame" : CopyPrevFrame
+  }
 
   def __init__(self, frame, em, screen):
     super(SelectMode, self).__init__(frame, em, screen)
@@ -443,12 +448,18 @@ class SelectMode(Mode):
 
   def runFromConsole(self, cmdLine):
     print(cmdLine)
-    if self.selectedData == None:
-      raise AssertionError("No Geometry Selected")
     parts = [each for each in cmdLine.split(' ') if each]
     funcName = parts[0]
-    cmdSuite = SelectMode.GEOM_TO_MODE[type(self.selectedData)].CONSOLE_CMDS
-    action = cmdSuite[funcName].buildFromConsole(parts[1:], self.selectedData, self.fm.getDM())
+    del parts[0]
+
+    action = None
+    if self.selectedData == None:
+      cmd = SelectMode.CONSOLE_CMDS[funcName]
+      action = cmd.buildFromConsole(parts, self, self.fm.getDM())
+    else:
+      cmd = SelectMode.GEOM_TO_MODE[type(self.selectedData)].CONSOLE_CMDS[funcName]
+      action = cmd.buildFromConsole(parts, self.selectedData, self.fm.getDM())
+
     self.fm.getAH().do(action)
 
 
@@ -496,11 +507,11 @@ class ModeSelector(object):
           else:
             self.currMode.runFromConsole(cmdLine)
         except IndexError as ie:
-          print("No Data To Operate On: " + str(ie))
+          print("No Data To Operate On: {}: {}".format(str(ie), tb.format_exc()))
         except KeyError as ke:
-          print("Command not found: " + str(ke))
+          print("Command not found: {}: {}".format(str(ke), tb.format_exc()))
         except Exception as exp:
-          print("{}: {}".format(type(exp).__name__, str(exp)))
+          print("{}: {}: {}".format(type(exp).__name__, str(exp), tb.format_exc()))
 
     for key,but in self.uibuttons.items():
       but.update(em.mouse)
@@ -510,6 +521,11 @@ class ModeSelector(object):
       if em.keyboard[mode.BINDING].checkFall():
         self.swapModeByClass(mode)
     if em.keyboard[pg.K_ESCAPE].checkFall():
+      self.currMode.reset()
+    ##################################
+
+    # HACK: Changing Frame clears selected data #
+    if em.keyboard[pg.K_LEFT].checkFall() or em.keyboard[pg.K_RIGHT].checkFall():
       self.currMode.reset()
     ##################################
 

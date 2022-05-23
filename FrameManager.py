@@ -32,11 +32,10 @@ class FrameManager(object):
   def next(self):
     if self.fidx < len(self.frames) - 1:
       self.fidx += 1
-      self.currFrame = self.frames[self.fidx]
     else:
       self.frames.append(Frame(self.currFrame))
       self.fidx = len(self.frames)-1
-      self.currFrame = self.frames[self.fidx]
+    self.currFrame = self.frames[self.fidx]
 
   def prev(self):
     if self.fidx > 0:

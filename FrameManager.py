@@ -13,11 +13,19 @@ class Frame(object):
       self.dm = frame.dm.copy()
     self.ah = ActionHistory()
 
-
   def copy(self):
     f = Frame()
     f.dm = self.dm.copy()
     f.ah = ActionHistory()
+    return f
+
+  def getPickles(self):
+    return self.dm.getPickles()
+
+  @staticmethod
+  def readPickles(data):
+    f = Frame()
+    f.dm = DataManager.readPickles(data)
     return f
 
 class FrameManager(object):
@@ -86,3 +94,15 @@ class FrameManager(object):
     screen.blit(text, (20, 40))
     self.currFrame.dm.draw(screen)
     self.currFrame.dm.drawInfo(screen)
+
+  def getPickles(self):
+    return tuple(frame.getPickles() for frame in self.frames)
+
+  @staticmethod
+  def readPickles(data):
+    fm = FrameManager()
+    fm.frames.clear()
+    for frame in data:
+      fm.frames.append(Frame.readPickles(frame))
+    fm.currFrame = fm.frames[0]
+    return fm

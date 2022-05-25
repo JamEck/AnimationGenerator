@@ -90,6 +90,26 @@ class DataManager(object):
       print("Improper input type! ({})".format(cls))
     return None
 
+  def getPickles(self):
+    return (
+      tuple(each.getPickles() for each in self.vertices),
+      tuple(each.getPickles() for each in self.lines),
+      tuple(each.getPickles() for each in self.circles),
+      tuple(each.getPickles() for each in self.pills),
+      self.image
+    )
+
+  @staticmethod
+  def readPickles(data):
+    dm = DataManager()
+    for vert in data[0]: dm.vertices.append(Vertex.readPickles(vert))
+    for line in data[1]: dm.lines   .append(Line  .readPickles(line))
+    for circ in data[2]: dm.circles .append(Circle.readPickles(circ))
+    for pill in data[3]: dm.pills   .append(Pill  .readPickles(pill))
+    dm.image = data[4]
+    dm._link(dm)
+    return dm
+
   def loadImageDrop(self, file_drop):
     self.image = Image(file_drop.path)
     self.image.pos = file_drop.pos

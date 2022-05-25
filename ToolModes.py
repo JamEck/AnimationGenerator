@@ -485,6 +485,11 @@ class ModeSelector(object):
   def swapModeByClass(self, cls):
     self.swapMode(self.uibuttons[cls].dataRise)
 
+  def setFrameManager(self, fm):
+    for mode in ModeSelector.MODES:
+      self.uibuttons[mode].dataRise.fm = fm
+
+
   def makeUIButtons(self, fm, em, screen):
     self.uibuttons = {
       mode : UIButton(pos = self.pos + (i*120, 0), dim = (100,30), text=mode.NAME)

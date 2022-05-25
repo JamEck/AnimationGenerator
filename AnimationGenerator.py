@@ -9,41 +9,53 @@ from DataManager  import DataManager
 from ToolModes    import *
 from FrameManager import *
 from Text import *
+import FileSaver
 import time
 
-pg.init()
+def main():
+  screen = pg.display.set_mode(SCREEN_SIZE)
+  pg.display.set_caption("Animation Tool")
 
-screen = pg.display.set_mode(SCREEN_SIZE)
-pg.display.set_caption("Animation Tool")
+  em = EventManager()
+  fm = FrameManager()
+  ms = ModeSelector(fm,em,screen) # Mode Indicator GUI
 
-em = EventManager()
+  while em.running:
+    # time.sleep(0.1) # slow loop for debugging
+    screen.fill((20,0,50))
 
-fm = FrameManager()
-ms = ModeSelector(fm,em,screen) # Mode Indicator GUI
+    em.update()
 
-nearest = None
-while em.running:
-  # time.sleep(0.1) # slow loop for debugging
-  screen.fill((20,0,50))
+    try:
+      if em.keyboard[pg.K_s].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
+          FileSaver.saveToFile("saveFiles", "saveFile", fm)
+      if em.keyboard[pg.K_o].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
+          fm = FileSaver.loadFromFile("saveFiles", "saveFile.sav")
+          ms = ModeSelector(fm,em,screen)
+    except Exception as exp:
+      print(str(exp))
 
-  em.update()
-  fm.update(em)
-  ms.update(em)
+    fm.update(em)
+    ms.update(em)
 
-  # Undo/Redo #
-  if em.keyboard[pg.K_z].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
-    if em.keyboard[pg.K_LSHIFT].checkHeld():
-      fm.currFrame.ah.redo()
-    else:
-      fm.currFrame.ah.undo()
-  #############
+    # Undo/Redo #
+    if em.keyboard[pg.K_z].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
+      if em.keyboard[pg.K_LSHIFT].checkHeld():
+        fm.currFrame.ah.redo()
+      else:
+        fm.currFrame.ah.undo()
+    #############
 
-  if (em.console.isActive()):
-    em.console.draw(screen)
+    if (em.console.isActive()):
+      em.console.draw(screen)
 
-  fm.draw(screen)
-  ms.draw(screen)
+    fm.draw(screen)
+    ms.draw(screen)
 
-  pg.display.update()
+    pg.display.update()
 
-pg.quit()
+
+if __name__ == "__main__":
+  pg.init()
+  main()
+  pg.quit()

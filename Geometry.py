@@ -25,6 +25,18 @@ class Geometry(object):
   def printAttr(self, screen):
     pass
 
+  def getPickles(self):
+      return (self.color, self.visible, self.id)
+
+  @staticmethod
+  def readPickles(data):
+    g = Geometry()
+    g.color = data[0]
+    g.visible = data[1]
+    g.id = data[2]
+    return g
+
+
 class Vertex(Geometry):
   """docstring for Vertex"""
   def __init__(self, *p):
@@ -52,9 +64,19 @@ class Vertex(Geometry):
     self.printText(screen, "Vert: " + str(self.id), self.pos.asTuple())
     self.printText(screen, "Pos: " + str(self.pos), (self.pos + Vec2(0, self.fontSize)).asTuple())
 
+  def getPickles(self):
+      return (super().getPickles(), self.pos)
+
+  @staticmethod
+  def readPickles(data):
+    v = Vertex()
+    Geometry.readPickles(data[0]).giveAttr(v)
+    v.pos = data[1]
+    return v
+
 class Line(Geometry):
   """docstring for Line"""
-  def __init__(self, p1, p2):
+  def __init__(self, p1 = None, p2 = None):
     super(Line, self).__init__()
     self.p1 = p1
     self.p2 = p2
@@ -91,9 +113,22 @@ class Line(Geometry):
   def toVec(self):
     return self.p2.pos - self.p1.pos
 
+  def getPickles(self):
+      return (super().getPickles(), self.p1.getPickles(), self.p2.getPickles(), self.maxlen)
+
+  @staticmethod
+  def readPickles(data):
+    l = Line()
+    Geometry.readPickles(data[0]).giveAttr(l)
+    l.p1 = Vertex.readPickles(data[1])
+    l.p2 = Vertex.readPickles(data[2])
+    l.maxlen = data[3]
+    return l
+
+
 class Circle(Geometry):
   """docstring for Circle"""
-  def __init__(self, pos, rad = 100):
+  def __init__(self, pos = None, rad = 100):
     super(Circle, self).__init__()
     self.center = pos
     self.rad = rad
@@ -123,6 +158,17 @@ class Circle(Geometry):
     if self.maxRad > 0 and self.rad > self.maxRad:
       self.rad = self.maxRad
 
+  def getPickles(self):
+      return (super().getPickles(), self.center.getPickles(), self.rad, self.maxRad)
+
+  @staticmethod
+  def readPickles(data):
+    c = Circle()
+    Geometry.readPickles(data[0]).giveAttr(c)
+    c.center = Vertex.readPickles(data[1])
+    c.rad    = data[2]
+    c.maxRad = data[3]
+    return c
 
 class Pill(Geometry):
   """docstring for Pill"""
@@ -221,6 +267,18 @@ class Pill(Geometry):
       if len(self.points) >= 4:
         pg.draw.line(screen, color, self.points[0].asTuple(), self.points[1].asTuple(), 2)
         pg.draw.line(screen, color, self.points[2].asTuple(), self.points[3].asTuple(), 2)
+
+  def getPickles(self):
+      return (super().getPickles(), self.circle1.getPickles(), self.circle2.getPickles())
+
+  @staticmethod
+  def readPickles(data):
+    p = Pill()
+    Geometry.readPickles(data[0]).giveAttr(p)
+    p.circle1 = Circle.readPickles(data[1])
+    p.circle2 = Circle.readPickles(data[2])
+    p.update()
+    return p
 
   def printAttr(self, screen):
     axis = self.getAxis()

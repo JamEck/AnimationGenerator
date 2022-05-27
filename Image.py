@@ -7,13 +7,12 @@ class Image(object):
 
   def __init__(self, path = None):
     super(Image, self).__init__()
+    self.path = str()
     self.data = None
     self.data_bkp = None
-    self.path = str()
-    self.id = None
-    self.visible = True
     self.pos = Vec2(SCREEN_SIZE)/2
     self._scale = 1.0
+    self.visible = True
     if path != None:
       self.load(path)
 
@@ -28,7 +27,6 @@ class Image(object):
     img.data = other.data.copy()
     img.data_bkp = other.data_bkp.copy()
     img.path = other.path
-    img.id = other.id
     img.visible = other.visible
     img.pos = other.pos
     img._scale = other._scale
@@ -75,3 +73,16 @@ class Image(object):
   @staticmethod
   def load_from_path(img_path):
     return pg.image.load(img_path)
+
+  def getPickles(self):
+    return ( self.path, self.pos, self._scale, self.visible )
+
+  @staticmethod
+  def readPickles(data):
+    if data == None:
+      return None
+    img = Image  (data[0])
+    img.pos     = data[1]
+    img.setScale (data[2])
+    img.visible = data[3]
+    return img

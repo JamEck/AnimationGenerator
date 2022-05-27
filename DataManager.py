@@ -96,7 +96,7 @@ class DataManager(object):
       tuple(each.getPickles() for each in self.lines),
       tuple(each.getPickles() for each in self.circles),
       tuple(each.getPickles() for each in self.pills),
-      self.image
+      self.image.getPickles() if self.image != None else None
     )
 
   @staticmethod
@@ -106,7 +106,7 @@ class DataManager(object):
     for line in data[1]: dm.lines   .append(Line  .readPickles(line))
     for circ in data[2]: dm.circles .append(Circle.readPickles(circ))
     for pill in data[3]: dm.pills   .append(Pill  .readPickles(pill))
-    dm.image = data[4]
+    dm.image = Image.readPickles(data[4])
     dm._link(dm)
     return dm
 

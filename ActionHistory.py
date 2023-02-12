@@ -193,7 +193,7 @@ class MoveImage(MoveItem):
     super(MoveImage, self).__init__(imgObj, newPos, dataMan)
 
   def do(self):
-    self.data.pos = self.newPos.copy()
+    self.data.setPos(self.newPos.copy())
 
   def undo(self):
     self.data.pos = self.oldPos
@@ -215,7 +215,7 @@ class ResetImage(Action):
     self.OLD_visible = self.data.visible
     self.OLD_pos     = self.data.pos
     self.OLD_data    = self.data.data.copy()
-    self.OLD_scale   = self.data._scale
+    self.OLD_scale   = self.data.scale
 
   def do(self):
     self.data.reset()
@@ -224,7 +224,7 @@ class ResetImage(Action):
     self.data.visible = self.OLD_visible
     self.data.pos     = self.OLD_pos
     self.data.data    = self.OLD_data.copy()
-    self.data._scale  = self.OLD_scale
+    self.data.scale  = self.OLD_scale
 
   @classmethod
   def buildFromConsole(cls, args, imageObj, dataMan):
@@ -250,7 +250,7 @@ class ClearImage(Action):
     self.dataMan.image.pos     = self.data.pos
     self.dataMan.image.visible = self.data.visible
     self.dataMan.image.data    = self.data.data.copy()
-    self.dataMan.image._scale  = self.data._scale
+    self.dataMan.image.scale  = self.data.scale
 
   @classmethod
   def buildFromConsole(cls, args, imageObj, dataMan):
@@ -265,7 +265,7 @@ class ScaleImage(Action):
   """docstring for ScaleImage"""
   def __init__(self, imgObj, newScale, dataMan):
     super(ScaleImage, self).__init__(imgObj, dataMan)
-    self.oldScale = imgObj._scale
+    self.oldScale = imgObj.scale
     self.newScale = newScale
 
   def do(self):

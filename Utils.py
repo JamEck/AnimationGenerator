@@ -14,6 +14,20 @@ class COLOR:
   WHITE   = (0xFF, 0xFF, 0xFF)
   GREY    = (0x7F, 0x7F, 0x7F)
 
+  def toInt(r, g, b, a = 0xFF):
+    ans = 0
+    for ch in (r, g, b, a):
+      ans <<= 8
+      ans |= ch
+    return ans
+
+  def toList(color):
+    ans = list()
+    for i in range(4):
+      ans.append(color & 0xFF)
+      color >>= 8
+    return ans
+
 
 def sign(boolean):
   return 1 if boolean else -1
@@ -25,7 +39,7 @@ class Vec2(object):
     if(not inp): self.set(0,0)
     elif isinstance(inp[0], (int,float)): self.set(inp[0],inp[1])
     elif isinstance(inp[0],  Vec2): self.fromVec2(inp[0])
-    elif isinstance(inp[0], tuple): self.fromTuple(inp[0])
+    elif isinstance(inp[0], (list,tuple)): self.fromTuple(inp[0])
 
   def set(self,x,y):
     self.x = x

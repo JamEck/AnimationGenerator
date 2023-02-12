@@ -30,10 +30,11 @@ def main():
       if em.keyboard[pg.K_s].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
           FileSaver.saveToFile("saveFiles", "saveFile", fm)
       if em.keyboard[pg.K_o].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
-          fm = FileSaver.loadFromFile("saveFiles", "saveFile.sav")
+          fm = FrameManager.genFromJson("saveFiles", "saveFile.json")
           ms = ModeSelector(fm,em,screen)
     except Exception as exp:
       print(str(exp))
+      print(tb.format_exc())
 
     fm.update(em)
     ms.update(em)

@@ -64,6 +64,18 @@ class DataManager(object):
     for i in range(len(self.pills)):
       other.pills[i].circle1 = self.findByID(other.circles,self.pills[i].circle1.id)
       other.pills[i].circle2 = self.findByID(other.circles,self.pills[i].circle2.id)
+      other.pills[i].update()
+
+  def _link_ids(self, other):
+    for i in range(len(self.lines)):
+      other.lines[i].p1 = self.findByID(other.vertices,self.lines[i].p1)
+      other.lines[i].p2 = self.findByID(other.vertices,self.lines[i].p2)
+    for i in range(len(self.circles)):
+      other.circles[i].center = self.findByID(other.vertices,self.circles[i].center)
+    for i in range(len(self.pills)):
+      other.pills[i].circle1 = self.findByID(other.circles,self.pills[i].circle1)
+      other.pills[i].circle2 = self.findByID(other.circles,self.pills[i].circle2)
+      other.pills[i].update()
 
   @staticmethod
   def assign(item, array):
@@ -90,24 +102,24 @@ class DataManager(object):
       print("Improper input type! ({})".format(cls))
     return None
 
-  def getPickles(self):
-    return (
-      tuple(each.getPickles() for each in self.vertices),
-      tuple(each.getPickles() for each in self.lines),
-      tuple(each.getPickles() for each in self.circles),
-      tuple(each.getPickles() for each in self.pills),
-      self.image.getPickles() if self.image != None else None
-    )
+  def makeDict(self):
+    return { __class__.__name__ : {
+      "vertices" : [self.vertices[i].makeDict() for i in range(len(self.vertices))],
+      "lines"    : [each.makeDict() for each in self.lines   ],
+      "circles"  : [each.makeDict() for each in self.circles ],
+      "pills"    : [each.makeDict() for each in self.pills   ],
+      "image"    : self.image.makeDict() if self.image != None else None
+    }}
 
   @staticmethod
-  def readPickles(data):
+  def fromDict(data):
     dm = DataManager()
-    for vert in data[0]: dm.vertices.append(Vertex.readPickles(vert))
-    for line in data[1]: dm.lines   .append(Line  .readPickles(line))
-    for circ in data[2]: dm.circles .append(Circle.readPickles(circ))
-    for pill in data[3]: dm.pills   .append(Pill  .readPickles(pill))
-    dm.image = Image.readPickles(data[4])
-    dm._link(dm)
+    for vert in data["vertices"]: dm.vertices.append(Vertex.fromDict(vert["Vertex"]))
+    for line in data["lines"   ]: dm.lines   .append(Line  .fromDict(line["Line"  ]))
+    for circ in data["circles" ]: dm.circles .append(Circle.fromDict(circ["Circle"]))
+    for pill in data["pills"   ]: dm.pills   .append(Pill  .fromDict(pill["Pill"  ]))
+    dm.image = Image.fromDict(data["image"])
+    dm._link_ids(dm)
     return dm
 
   def loadImageDrop(self, file_drop):

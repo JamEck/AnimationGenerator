@@ -2,6 +2,7 @@ from DataManager import DataManager
 from ActionHistory import *
 import os
 import pygame as pg
+import json
 
 class Frame(object):
   """docstring for Frame"""
@@ -19,13 +20,13 @@ class Frame(object):
     f.ah = ActionHistory()
     return f
 
-  def getPickles(self):
-    return self.dm.getPickles()
+  def makeDict(self):
+    return {__class__.__name__ : self.dm.makeDict()}
 
   @staticmethod
-  def readPickles(data):
+  def fromDict(data):
     f = Frame()
-    f.dm = DataManager.readPickles(data)
+    f.dm = DataManager.fromDict(data["DataManager"])
     return f
 
 class FrameManager(object):
@@ -66,10 +67,37 @@ class FrameManager(object):
   def getAH(self):
     return self.currFrame.ah
 
+  def loadFromJson(self, dir, fileName):
+    filePath = os.path.join(dir, fileName)
+
+    if ".json" not in fileName:
+        raise ValueError("{} Is Not A .json File".format(filePath))
+
+    if not os.path.exists(filePath):
+        raise FileNotFoundError("File {} does not exist".format(filePath))
+
+    data = None
+    # with open(os.path.join(dir, fileName), "rb") as inFile:
+    #     data = pickle.load(inFile)
+
+    with open(os.path.join(dir, fileName), "r") as inFile:
+        data = json.load(inFile)
+
+    self.fromDict(data["FrameManager"])
+
+  def genFromJson(dir, fileName):
+    ret = FrameManager()
+    ret.loadFromJson(dir, fileName)
+    return ret
+
   def handleFileDrop(self, file_drop):
     print("File Dropped: " + file_drop.path)
-    if os.path.splitext(file_drop.path)[-1].lower() == ".png":
+    ext = os.path.splitext(file_drop.path)[-1].lower()
+    if ext == ".png" or ext == ".bmp":
       self.currFrame.ah.do(LoadImage(file_drop, self.currFrame.dm))
+    if ext == ".json":
+      print("json loaded")
+      self.loadFromJson(*os.path.split(file_drop.path))
 
   def update(self, em):
     if em.keyboard[pg.K_RIGHT].checkFall():
@@ -95,14 +123,17 @@ class FrameManager(object):
     self.currFrame.dm.draw(screen)
     self.currFrame.dm.drawInfo(screen)
 
-  def getPickles(self):
-    return tuple(frame.getPickles() for frame in self.frames)
+  def makeDict(self):
+    return {__class__.__name__ : [frame.makeDict() for frame in self.frames]}
+
+  def fromDict(self, data):
+    self.frames.clear()
+    for frame in data:
+      self.frames.append(Frame.fromDict(frame["Frame"]))
+    self.currFrame = self.frames[0]
 
   @staticmethod
-  def readPickles(data):
+  def genFromDict(data):
     fm = FrameManager()
-    fm.frames.clear()
-    for frame in data:
-      fm.frames.append(Frame.readPickles(frame))
-    fm.currFrame = fm.frames[0]
+    fm.fromDict(data)
     return fm

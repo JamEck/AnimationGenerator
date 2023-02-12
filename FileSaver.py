@@ -1,29 +1,13 @@
 from fileinput import filename
-import pickle
 import os
-import tempfile
 from FrameManager import FrameManager
-from ToolModes import ModeSelector
-import pygame as pg
-
-def loadFromFile(dir, fileName):
-    filePath = os.path.join(dir, fileName)
-
-    if ".sav" not in fileName:
-        raise ValueError("{} Is Not A .sav File".format(filePath))
-
-    if not os.path.exists(filePath):
-        raise FileNotFoundError("File {} does not exist".format(filePath))
-
-    data = None
-    with open(os.path.join(dir, fileName), "rb") as inFile:
-        data = pickle.load(inFile)
-
-    return FrameManager.readPickles(data)
+import pickle
+import json
+import traceback as tb
 
 
 def saveToFile(dir, fileName, frameMan):
-    fileName = os.path.splitext(fileName)[0] + ".sav"
+    fileName = os.path.splitext(fileName)[0] + ".json"
 
     if not os.path.exists(dir):
         print("Directory {} does not exist".format(dir))
@@ -39,8 +23,11 @@ def saveToFile(dir, fileName, frameMan):
     filePath = os.path.join(dir, fileName)
     tempPath = filePath + ".temp"
     try:
-        with open(tempPath, "wb") as outFile:
-            pickle.dump(frameMan.getPickles(), outFile)
+        # with open(tempPath, "wb") as outFile:
+        #     pickle.dump(frameMan.getPickles(), outFile)
+
+        with open(tempPath, "w") as outFile:
+            json.dump(frameMan.makeDict(), outFile)
 
         if os.path.exists(filePath):
             os.remove(filePath)
@@ -50,5 +37,4 @@ def saveToFile(dir, fileName, frameMan):
         if os.path.exists(tempPath):
             os.remove(tempPath)
         print(str(e))
-
-
+        print(tb.format_exc())

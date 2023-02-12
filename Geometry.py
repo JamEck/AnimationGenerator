@@ -1,6 +1,7 @@
 import pygame as pg
 from Utils import *
 import math
+import traceback as tb
 
 class Geometry(object):
   """docstring for Geometry"""
@@ -25,16 +26,22 @@ class Geometry(object):
   def printAttr(self, screen):
     pass
 
-  def getPickles(self):
-      return (self.color, self.visible, self.id)
+  def makeDict(self):
+    return {
+      "color"   : COLOR.toInt(*self.color),
+      "visible" : self.visible,
+      "id"      : self.id
+    }
 
-  @staticmethod
-  def readPickles(data):
-    g = Geometry()
-    g.color = data[0]
-    g.visible = data[1]
-    g.id = data[2]
-    return g
+  def fromDictGeom(self, data):
+    self.color   = COLOR.toList(data["color"])
+    self.visible = data["visible"]
+    self.id      = data["id"     ]
+
+# JSON IS STORING REDUNDANT VERTICES
+# STORE VERTS FROM HIGHER LEVEL GEOM AS IDS O_NDELAY
+
+# FOR SOME REASON, COLOR IS COMING IN AS TUPLES (ALREADY TRANSLATED FROM INT)
 
 
 class Vertex(Geometry):
@@ -64,14 +71,17 @@ class Vertex(Geometry):
     self.printText(screen, "Vert: " + str(self.id), self.pos.asTuple())
     self.printText(screen, "Pos: " + str(self.pos), (self.pos + Vec2(0, self.fontSize)).asTuple())
 
-  def getPickles(self):
-      return (super().getPickles(), self.pos)
+  def makeDict(self):
+    return { __class__.__name__ : {
+      **super(Vertex, self).makeDict(),
+      "pos" : self.pos.asTuple()
+    }}
 
   @staticmethod
-  def readPickles(data):
+  def fromDict(data):
     v = Vertex()
-    Geometry.readPickles(data[0]).giveAttr(v)
-    v.pos = data[1]
+    v.fromDictGeom(data)
+    v.pos = Vec2(data["pos"])
     return v
 
 class Line(Geometry):
@@ -113,18 +123,22 @@ class Line(Geometry):
   def toVec(self):
     return self.p2.pos - self.p1.pos
 
-  def getPickles(self):
-      return (super().getPickles(), self.p1.getPickles(), self.p2.getPickles(), self.maxlen)
+  def makeDict(self):
+    return { __class__.__name__ : {
+      **super(Line, self).makeDict(),
+      "p1"     : self.p1.id,
+      "p2"     : self.p2.id,
+      "maxlen" : self.maxlen
+    }}
 
   @staticmethod
-  def readPickles(data):
+  def fromDict(data):
     l = Line()
-    Geometry.readPickles(data[0]).giveAttr(l)
-    l.p1 = Vertex.readPickles(data[1])
-    l.p2 = Vertex.readPickles(data[2])
-    l.maxlen = data[3]
+    l.fromDictGeom(data)
+    l.p1     = data["p1"]
+    l.p2     = data["p2"]
+    l.maxlen = data["maxlen"]
     return l
-
 
 class Circle(Geometry):
   """docstring for Circle"""
@@ -158,16 +172,21 @@ class Circle(Geometry):
     if self.maxRad > 0 and self.rad > self.maxRad:
       self.rad = self.maxRad
 
-  def getPickles(self):
-      return (super().getPickles(), self.center.getPickles(), self.rad, self.maxRad)
+  def makeDict(self):
+    return { __class__.__name__ : {
+      **super(Circle, self).makeDict(),
+      "center" : self.center.id,
+      "rad"    : self.rad,
+      "maxRad" : self.maxRad
+    }}
 
   @staticmethod
-  def readPickles(data):
+  def fromDict(data):
     c = Circle()
-    Geometry.readPickles(data[0]).giveAttr(c)
-    c.center = Vertex.readPickles(data[1])
-    c.rad    = data[2]
-    c.maxRad = data[3]
+    c.fromDictGeom(data)
+    c.rad    = data["rad"]
+    c.maxRad = data["maxRad"]
+    c.center = data["center"]
     return c
 
 class Pill(Geometry):
@@ -268,16 +287,20 @@ class Pill(Geometry):
         pg.draw.line(screen, color, self.points[0].asTuple(), self.points[1].asTuple(), 2)
         pg.draw.line(screen, color, self.points[2].asTuple(), self.points[3].asTuple(), 2)
 
-  def getPickles(self):
-      return (super().getPickles(), self.circle1.getPickles(), self.circle2.getPickles())
+  def makeDict(self):
+    return { __class__.__name__ : {
+      **super(Pill, self).makeDict(),
+      "circle1" : self.circle1.makeDict(),
+      "circle2" : self.circle2.makeDict(),
+    }}
 
   @staticmethod
-  def readPickles(data):
+  def fromDict(data):
     p = Pill()
-    Geometry.readPickles(data[0]).giveAttr(p)
-    p.circle1 = Circle.readPickles(data[1])
-    p.circle2 = Circle.readPickles(data[2])
-    p.update()
+    p.fromDictGeom(data)
+    p.circle1 = Circle.fromDict(data["circle1"])
+    p.circle2 = Circle.fromDict(data["circle2"])
+    # p.update()
     return p
 
   def printAttr(self, screen):

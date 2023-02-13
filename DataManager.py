@@ -122,6 +122,20 @@ class DataManager(object):
     dm._link_ids(dm)
     return dm
 
+
+  def asBytes(self):
+    block = struct.pack("HHHH", # header
+      len(self.vertices),
+      len(self.lines   ),
+      len(self.circles ),
+      len(self.pills   )
+    )
+    for vert in self.vertices: block += vert.asBytes()
+    for line in self.lines   : block += line.asBytes()
+    for circ in self.circles : block += circ.asBytes()
+    for pill in self.pills   : block += pill.asBytes()
+    return block
+
   def loadImageDrop(self, file_drop):
     self.image = Image(file_drop.path)
     self.image.pos = file_drop.pos

@@ -3,6 +3,7 @@ from ActionHistory import *
 import os
 import pygame as pg
 import json
+import struct
 
 class Frame(object):
   """docstring for Frame"""
@@ -137,3 +138,9 @@ class FrameManager(object):
     fm = FrameManager()
     fm.fromDict(data)
     return fm
+
+  def asBytes(self):
+    block = struct.pack("H", len(self.frames))
+    for frame in self.frames:
+      block += frame.dm.asBytes()
+    return block

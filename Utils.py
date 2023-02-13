@@ -1,5 +1,6 @@
 import math
 import pygame as pg
+import struct
 
 SCREEN_SIZE = (1280,960)
 
@@ -168,6 +169,12 @@ class Vec2(object):
 
   def asTuple(self):
     return (self.x, self.y)
+
+  def asBytes(self):
+    fmt = "ii"
+    if isinstance(self.x, (float)) or isinstance(self.y, (float)):
+      fmt = "ff"
+    return struct.pack(fmt, self.x, self.y)
 
   def toInt(self):
     return Vec2(int(self.x),int(self.y))

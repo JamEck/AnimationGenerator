@@ -28,7 +28,8 @@ def main():
 
     try:
       if em.keyboard[pg.K_s].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
-          FileSaver.saveToFile("saveFiles", "saveFile", fm)
+          FileSaver.saveToJson("saveFiles", "saveFile", fm)
+          FileSaver.saveToBinary("saveFiles", "saveFile", fm)
       if em.keyboard[pg.K_o].checkFall() and em.keyboard[pg.K_LCTRL].checkHeld():
           fm = FrameManager.genFromJson("saveFiles", "saveFile.json")
           ms = ModeSelector(fm,em,screen)

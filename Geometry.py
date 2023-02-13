@@ -2,6 +2,7 @@ import pygame as pg
 from Utils import *
 import math
 import traceback as tb
+import struct
 
 class Geometry(object):
   """docstring for Geometry"""
@@ -84,6 +85,9 @@ class Vertex(Geometry):
     v.pos = Vec2(data["pos"])
     return v
 
+  def asBytes(self):
+    return struct.pack("Hxx", self.id) + self.pos.asBytes()
+
 class Line(Geometry):
   """docstring for Line"""
   def __init__(self, p1 = None, p2 = None):
@@ -140,6 +144,9 @@ class Line(Geometry):
     l.maxlen = data["maxlen"]
     return l
 
+  def asBytes(self):
+    return struct.pack("HHH", self.id, self.p1.id, self.p2.id)
+
 class Circle(Geometry):
   """docstring for Circle"""
   def __init__(self, pos = None, rad = 100):
@@ -188,6 +195,9 @@ class Circle(Geometry):
     c.maxRad = data["maxRad"]
     c.center = data["center"]
     return c
+
+  def asBytes(self):
+    return struct.pack("HHH", self.id, self.rad, self.center.id)
 
 class Pill(Geometry):
   """docstring for Pill"""
@@ -290,17 +300,16 @@ class Pill(Geometry):
   def makeDict(self):
     return { __class__.__name__ : {
       **super(Pill, self).makeDict(),
-      "circle1" : self.circle1.makeDict(),
-      "circle2" : self.circle2.makeDict(),
+      "circle1" : self.circle1.id,
+      "circle2" : self.circle2.id,
     }}
 
   @staticmethod
   def fromDict(data):
     p = Pill()
     p.fromDictGeom(data)
-    p.circle1 = Circle.fromDict(data["circle1"])
-    p.circle2 = Circle.fromDict(data["circle2"])
-    # p.update()
+    p.circle1 = data["circle1"]
+    p.circle2 = data["circle2"]
     return p
 
   def printAttr(self, screen):
@@ -310,3 +319,6 @@ class Pill(Geometry):
     self.printText(screen, "Len : {:.1f}".format(axis.p1.pos.dist(axis.p2.pos)), (drawpoint + Vec2(0,self.fontSize)).asTuple())
     self.circle1.printAttr(screen)
     self.circle2.printAttr(screen)
+
+  def asBytes(self):
+    return struct.pack("HHH", self.id, self.circle1.id, self.circle2.id)

@@ -1,11 +1,20 @@
-a = (1,2,3)
+import struct
 
-b = a.copy()
+class vec:
+    def __init__(self):
+        self.id = 4
+        self.x = 12
+        self.y = 14
 
-print(a)
-print(b)
 
-b[1] = 7
+v = vec()
 
-print(a)
-print(b)
+print(v)
+
+pospack = struct.pack("ii", v.x, v.y)
+idpack = struct.pack("i", v.id)
+
+
+print(pospack)
+print(idpack)
+print(idpack + pospack)

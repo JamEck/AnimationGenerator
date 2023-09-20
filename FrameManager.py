@@ -104,14 +104,20 @@ class FrameManager(object):
       self.loadFromJson(*os.path.split(file_drop.path))
 
   def update(self, em):
-    if em.keyboard[pg.K_RIGHT].checkFall():
+    if em.keyboard[pg.K_PAGEUP].checkHeld():
+      self.next()
+    elif em.keyboard[pg.K_PAGEDOWN].checkHeld():
+      self.prev()
+
+    elif em.keyboard[pg.K_RIGHT].checkFall():
       if em.keyboard[pg.K_LCTRL].checkHeld():
         self.insert()
       else:
         self.next(em.keyboard[pg.K_LSHIFT].checkHeld())
-    if em.keyboard[pg.K_LEFT].checkFall():
+    elif em.keyboard[pg.K_LEFT].checkFall():
       self.prev()
-    if em.keyboard[pg.K_d].checkFall():
+
+    elif em.keyboard[pg.K_d].checkFall():
       if em.keyboard[pg.K_LCTRL].checkHeld():
         self.delete()
 

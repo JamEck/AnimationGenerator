@@ -505,21 +505,6 @@ class ModeSelector(object):
       val.onRise = self.swapMode
 
   def update(self, em):
-    if em.console.checkExecute():
-      cmdLine = em.console.getTextEntry()
-      if cmdLine:
-        try:
-          if cmdLine.startswith('>'):
-            exec(cmdLine[1:])
-          else:
-            self.currMode.runFromConsole(cmdLine)
-        except IndexError as ie:
-          print("No Data To Operate On: {}: {}".format(str(ie), tb.format_exc()))
-        except KeyError as ke:
-          print("Command not found: {}: {}".format(str(ke), tb.format_exc()))
-        except Exception as exp:
-          print("{}: {}: {}".format(type(exp).__name__, str(exp), tb.format_exc()))
-
     for key,but in self.uibuttons.items():
       but.update(em.mouse)
 

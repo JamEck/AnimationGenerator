@@ -38,6 +38,24 @@ def main():
       print(tb.format_exc())
 
     fm.update(em)
+
+    if em.console.checkExecute():
+      cmdLine = em.console.getTextEntry()
+      if cmdLine:
+        try:
+          if cmdLine.startswith('>'):
+            cmd = cmdLine[1:]
+            print("Execute: " + cmd)
+            exec(cmd)
+          else:
+            ms.currMode.runFromConsole(cmdLine)
+        except IndexError as ie:
+          print("No Data To Operate On: {}: {}".format(str(ie), tb.format_exc()))
+        except KeyError as ke:
+          print("Command not found: {}: {}".format(str(ke), tb.format_exc()))
+        except Exception as exp:
+          print("{}: {}: {}".format(type(exp).__name__, str(exp), tb.format_exc()))
+
     ms.update(em)
 
     # Undo/Redo #

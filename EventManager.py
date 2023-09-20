@@ -19,12 +19,16 @@ class EventManager(object):
     self.keyboard = Keyboard()
     self.console = Console()
     self.file_drop = None
+    self.fps = 60
+    self.clock = pg.time.Clock()
+
 
   def clearTriggers(self):
     self.console.textEntry.clearTriggers()
     self.file_drop = None
 
   def update(self):
+    self.clock.tick(self.fps)
     self.clearTriggers()
     self.mouse.update()
 

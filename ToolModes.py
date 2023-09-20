@@ -403,7 +403,8 @@ class SelectMode(Mode):
   }
   CONSOLE_CMDS = {
     "copyPrevFrame" : CopyPrevFrame,
-    "lerpToFrame"     : LerpToFrame
+    "lerp" : LerpToFrame,
+    "serp" : SerpToFrame,
   }
 
   def __init__(self, frame, em, screen):

@@ -39,10 +39,10 @@ class FrameManager(object):
     self.currFrame = self.frames[self.fidx]
     self.font = pg.font.SysFont("monospace", 20)
 
-  def next(self):
+  def next(self, create = False):
     if self.fidx < len(self.frames) - 1:
       self.fidx += 1
-    else:
+    elif create:
       self.frames.append(Frame(self.currFrame))
       self.fidx = len(self.frames)-1
     self.currFrame = self.frames[self.fidx]
@@ -108,7 +108,7 @@ class FrameManager(object):
       if em.keyboard[pg.K_LCTRL].checkHeld():
         self.insert()
       else:
-        self.next()
+        self.next(em.keyboard[pg.K_LSHIFT].checkHeld())
     if em.keyboard[pg.K_LEFT].checkFall():
       self.prev()
     if em.keyboard[pg.K_d].checkFall():

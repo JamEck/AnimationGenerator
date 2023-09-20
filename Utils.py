@@ -36,6 +36,13 @@ def sign(boolean):
 def lerp(a, b, p):
   return (b - a) * p + a
 
+def linspace(start, end, stepCount):
+  for i in range(stepCount+1):
+    yield lerp(start, end, i/stepCount)
+
+def sigmoid(inp):
+    return 1/(1+2.718**(-10 * inp + 5))
+
 class Vec2(object):
   def __init__(self, *inp):
     super(Vec2, self).__init__()

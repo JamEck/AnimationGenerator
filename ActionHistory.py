@@ -1,4 +1,4 @@
-from Utils import Vec2
+from Utils import Vec2, linspace, sigmoid
 
 def checkArgCount(args, n):
   if len(args) < n:
@@ -391,14 +391,16 @@ class CopyPrevFrame(Action):
     checkArgCount(args, 0)
     return CopyPrevFrame(toolMode, dataMan)
 
-class LerpToFrame(Action):
+class InterpToFrame(Action):
   def __init__(self, toolMode, dataMan, endFrame):
-    super(LerpToFrame, self).__init__(toolMode, dataMan)
+    super(InterpToFrame, self).__init__(toolMode, dataMan)
     ran = endFrame - toolMode.fm.fidx
     if ran < 2:
       raise AssertionError("No Frames Between Current And End Frame")
     if endFrame > len(toolMode.fm.frames):
       raise AssertionError("Frame {} Does Not Exist".format(endFrame))
+
+    self.tFunc = lambda x: x
 
     self.frameSaves = {i : toolMode.fm.frames[i] for i in range(toolMode.fm.fidx + 1, endFrame)}
     self.endFrame   = endFrame
@@ -406,18 +408,36 @@ class LerpToFrame(Action):
   def do(self):
     ran = abs(self.endFrame - self.data.fm.fidx)
     endFrameDM = self.data.fm.frames[self.endFrame].dm
-    for i in range(ran-1):
-      p = (i + 1) / ran
+    psteps = list(linspace(0,1,ran))[1:-1]
+    for i,p in enumerate(psteps):
       frame = self.data.fm.frames[self.data.fm.fidx].copy()
-      frame.dm.lerp(self.dataMan, endFrameDM, p)
+      frame.dm.lerp(self.dataMan, endFrameDM, self.tFunc(p))
       self.data.fm.frames[self.data.fm.fidx + i + 1] = frame
 
   def undo(self):
     for frameNum, frame in self.frameSaves.items():
       self.data.fm.frames[frameNum] = frame
 
+
+class LerpToFrame(InterpToFrame):
+  def __init__(self, toolMode, dataMan, endFrame):
+    super(LerpToFrame, self).__init__(toolMode, dataMan, endFrame)
+    self.tFunc = lambda x: x
+
   @staticmethod
   def buildFromConsole(args, toolMode, dataMan):
     checkArgCount(args, 1)
     endFrame = castInt(args[0])
     return LerpToFrame(toolMode, dataMan, endFrame)
+
+
+class SerpToFrame(InterpToFrame):
+  def __init__(self, toolMode, dataMan, endFrame):
+    super(SerpToFrame, self).__init__(toolMode, dataMan, endFrame)
+    self.tFunc = lambda x: sigmoid(x)
+
+  @staticmethod
+  def buildFromConsole(args, toolMode, dataMan):
+    checkArgCount(args, 1)
+    endFrame = castInt(args[0])
+    return SerpToFrame(toolMode, dataMan, endFrame)

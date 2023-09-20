@@ -69,6 +69,7 @@ class TextEntry:
     self.cancel()
 
   def historyBack(self):
+    if len(self.history) == 0: return
     if self.historyIndex == -1:
       self.tempbuffer = self.buffer.copy()
     self.historyIndex = min(self.historyIndex + 1, len(self.history) - 1)

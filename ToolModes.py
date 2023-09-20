@@ -402,7 +402,8 @@ class SelectMode(Mode):
     Pill   : PillMode,
   }
   CONSOLE_CMDS = {
-    "copyPrevFrame" : CopyPrevFrame
+    "copyPrevFrame" : CopyPrevFrame,
+    "lerpToFrame"     : LerpToFrame
   }
 
   def __init__(self, frame, em, screen):

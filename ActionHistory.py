@@ -1,4 +1,3 @@
-from DataManager import DataManager
 from Utils import Vec2
 
 def checkArgCount(args, n):
@@ -391,3 +390,34 @@ class CopyPrevFrame(Action):
   def buildFromConsole(args, toolMode, dataMan):
     checkArgCount(args, 0)
     return CopyPrevFrame(toolMode, dataMan)
+
+class LerpToFrame(Action):
+  def __init__(self, toolMode, dataMan, endFrame):
+    super(LerpToFrame, self).__init__(toolMode, dataMan)
+    ran = endFrame - toolMode.fm.fidx
+    if ran < 2:
+      raise AssertionError("No Frames Between Current And End Frame")
+    if endFrame > len(toolMode.fm.frames):
+      raise AssertionError("Frame {} Does Not Exist".format(endFrame))
+
+    self.frameSaves = {i : toolMode.fm.frames[i] for i in range(toolMode.fm.fidx + 1, endFrame)}
+    self.endFrame   = endFrame
+
+  def do(self):
+    ran = abs(self.endFrame - self.data.fm.fidx)
+    endFrameDM = self.data.fm.frames[self.endFrame].dm
+    for i in range(ran-1):
+      p = (i + 1) / ran
+      frame = self.data.fm.frames[self.data.fm.fidx].copy()
+      frame.dm.lerp(self.dataMan, endFrameDM, p)
+      self.data.fm.frames[self.data.fm.fidx + i + 1] = frame
+
+  def undo(self):
+    for frameNum, frame in self.frameSaves.items():
+      self.data.fm.frames[frameNum] = frame
+
+  @staticmethod
+  def buildFromConsole(args, toolMode, dataMan):
+    checkArgCount(args, 1)
+    endFrame = castInt(args[0])
+    return LerpToFrame(toolMode, dataMan, endFrame)

@@ -33,6 +33,8 @@ class COLOR:
 def sign(boolean):
   return 1 if boolean else -1
 
+def lerp(a, b, p):
+  return (b - a) * p + a
 
 class Vec2(object):
   def __init__(self, *inp):
@@ -166,7 +168,6 @@ class Vec2(object):
     self.x = min(self.x, x)
     self.y = min(self.y, y)
 
-
   def asTuple(self):
     return (self.x, self.y)
 
@@ -185,6 +186,8 @@ class Vec2(object):
   def __str__(self):
     return "({},{})".format(self.x,self.y)
 
+  def lerp(self, other, perc):
+    return (other - self) * perc + self
 
 class Bool2(object):
   """4-state, 2D Boolean"""

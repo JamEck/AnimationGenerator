@@ -88,6 +88,11 @@ class Vertex(Geometry):
   def asBytes(self):
     return struct.pack("Hxx", self.id) + self.pos.asBytes()
 
+  def lerp(self, start, end, perc):
+    if not all(isinstance(each, type(self)) for each in [start, end]):
+      raise AssertionError("Start and End of Lerp Must Be of Same Type as self: {}", type(self))
+    self.pos = start.pos.lerp(end.pos, perc)
+
 class Line(Geometry):
   """docstring for Line"""
   def __init__(self, p1 = None, p2 = None):
@@ -147,6 +152,12 @@ class Line(Geometry):
   def asBytes(self):
     return struct.pack("HHH", self.id, self.p1.id, self.p2.id)
 
+  def lerp(self, start, end, perc):
+    if not all(isinstance(each, type(self)) for each in [start, end]):
+      raise AssertionError("Start and End of Lerp Must Be of Same Type as self: {}", type(self))
+    self.p1.lerp(start.p1, end.p1, perc)
+    self.p2.lerp(start.p2, end.p2, perc)
+
 class Circle(Geometry):
   """docstring for Circle"""
   def __init__(self, pos = None, rad = 100):
@@ -198,6 +209,12 @@ class Circle(Geometry):
 
   def asBytes(self):
     return struct.pack("HHH", self.id, self.rad, self.center.id)
+
+  def lerp(self, start, end, perc):
+    if not all(isinstance(each, type(self)) for each in [start, end]):
+      raise AssertionError("Start and End of Lerp Must Be of Same Type as self: {}", type(self))
+    self.center.lerp(start.center, end.center, perc)
+    self.rad = lerp(start.rad, end.rad, perc)
 
 class Pill(Geometry):
   """docstring for Pill"""
@@ -322,3 +339,10 @@ class Pill(Geometry):
 
   def asBytes(self):
     return struct.pack("HHH", self.id, self.circle1.id, self.circle2.id)
+
+  def lerp(self, start, end, perc):
+    if not all(isinstance(each, type(self)) for each in [start, end]):
+      raise AssertionError("Start and End of Lerp Must Be of Same Type as self: {}", type(self))
+    self.circle1.lerp(start.circle1, end.circle1, perc)
+    self.circle2.lerp(start.circle2, end.circle2, perc)
+    self.update()

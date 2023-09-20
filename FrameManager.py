@@ -1,5 +1,5 @@
 from DataManager import DataManager
-from ActionHistory import *
+from ActionHistory import ActionHistory
 import os
 import pygame as pg
 import json
@@ -46,6 +46,9 @@ class FrameManager(object):
       self.frames.append(Frame(self.currFrame))
       self.fidx = len(self.frames)-1
     self.currFrame = self.frames[self.fidx]
+
+  def insert(self):
+    self.frames.insert(self.fidx+1, Frame())
 
   def prev(self):
     if self.fidx > 0:
@@ -102,7 +105,10 @@ class FrameManager(object):
 
   def update(self, em):
     if em.keyboard[pg.K_RIGHT].checkFall():
-      self.next()
+      if em.keyboard[pg.K_LCTRL].checkHeld():
+        self.insert()
+      else:
+        self.next()
     if em.keyboard[pg.K_LEFT].checkFall():
       self.prev()
     if em.keyboard[pg.K_d].checkFall():

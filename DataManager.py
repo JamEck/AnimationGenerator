@@ -57,14 +57,23 @@ class DataManager(object):
 
   def _link(self, other):
     for i in range(len(self.lines)):
-      other.lines[i].p1 = self.findByID(other.vertices,self.lines[i].p1.id)
-      other.lines[i].p2 = self.findByID(other.vertices,self.lines[i].p2.id)
+      try:
+        other.lines[i].p1 = self.findByID(other.vertices,self.lines[i].p1.id)
+        other.lines[i].p2 = self.findByID(other.vertices,self.lines[i].p2.id)
+      except IndexError:
+        pass
     for i in range(len(self.circles)):
-      other.circles[i].center = self.findByID(other.vertices,self.circles[i].center.id)
+      try:
+        other.circles[i].center = self.findByID(other.vertices,self.circles[i].center.id)
+      except IndexError:
+        pass
     for i in range(len(self.pills)):
-      other.pills[i].circle1 = self.findByID(other.circles,self.pills[i].circle1.id)
-      other.pills[i].circle2 = self.findByID(other.circles,self.pills[i].circle2.id)
-      other.pills[i].update()
+      try:
+        other.pills[i].circle1 = self.findByID(other.circles,self.pills[i].circle1.id)
+        other.pills[i].circle2 = self.findByID(other.circles,self.pills[i].circle2.id)
+        other.pills[i].update()
+      except IndexError:
+        pass
 
   def _link_ids(self, other):
     for i in range(len(self.lines)):
@@ -118,7 +127,8 @@ class DataManager(object):
     for line in data["lines"   ]: dm.lines   .append(Line  .fromDict(line["Line"  ]))
     for circ in data["circles" ]: dm.circles .append(Circle.fromDict(circ["Circle"]))
     for pill in data["pills"   ]: dm.pills   .append(Pill  .fromDict(pill["Pill"  ]))
-    dm.image = Image.fromDict(data["image"])
+    if data["image"]:
+      dm.image = Image.fromDict(data["image"]["Image"])
     dm._link_ids(dm)
     return dm
 
@@ -295,3 +305,13 @@ class DataManager(object):
     screen.blit(text, pos.asTuple()); pos.y += 20
     text = self.font.render("Pills   | " + str(len(self.pills   )), 0, (255,255,255))
     screen.blit(text, pos.asTuple())
+
+  def lerp(self, start, end, perc):
+    for dataList in self.dataMap.values():
+      for shape in dataList:
+        start_list  = start.dataMap[type(shape)]
+        end_list    =   end.dataMap[type(shape)]
+        start_shape = start.findByID(start_list, shape.id)
+        end_shape   =   end.findByID(  end_list, shape.id)
+        if start_shape == None or end_shape == None: continue
+        shape.lerp(start_shape, end_shape, perc)

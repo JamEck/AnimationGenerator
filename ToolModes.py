@@ -402,6 +402,7 @@ class SelectMode(Mode):
     Pill   : PillMode,
   }
   CONSOLE_CMDS = {
+    "copyFrame" : CopyFrame,
     "copyPrevFrame" : CopyPrevFrame,
     "lerp" : LerpToFrame,
     "serp" : SerpToFrame,

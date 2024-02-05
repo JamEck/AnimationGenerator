@@ -180,9 +180,7 @@ class Vec2(object):
 
   def asBytes(self):
     fmt = "ii"
-    if isinstance(self.x, (float)) or isinstance(self.y, (float)):
-      fmt = "ff"
-    return struct.pack(fmt, self.x, self.y)
+    return struct.pack(fmt, int(self.x), int(self.y))
 
   def toInt(self):
     return Vec2(int(self.x),int(self.y))

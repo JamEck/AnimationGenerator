@@ -370,6 +370,30 @@ class SetLineLen(Action):
     len = castInt(args[0])
     return SetLineLen(lineObj, len, dataMan)
 
+class CopyFrame(Action):
+  def __init__(self, toolMode, dataMan, framenum):
+    super(CopyFrame, self).__init__(toolMode, dataMan)
+    if (framenum < 0 or framenum > len(toolMode.fm.frames)):
+      raise AssertionError("Frame %d does not exist" % framenum)
+    self.otherDataMan = toolMode.fm.frames[framenum].dm
+    self.data_bkp = self.dataMan.copy()
+
+  def do(self):
+    self.data.reset()
+    self.dataMan.clear()
+    self.dataMan.copy_from(self.otherDataMan)
+
+  def undo(self):
+    self.data.reset()
+    self.dataMan.clear()
+    self.dataMan.copy_from(self.data_bkp)
+
+  @staticmethod
+  def buildFromConsole(args, toolMode, dataMan):
+    checkArgCount(args, 1)
+    framenum = castInt(args[0])
+    return CopyFrame(toolMode, dataMan, framenum)
+
 class CopyPrevFrame(Action):
   def __init__(self, toolMode, dataMan):
     super(CopyPrevFrame, self).__init__(toolMode, dataMan)
